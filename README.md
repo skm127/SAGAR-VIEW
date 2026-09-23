@@ -1,4 +1,4 @@
-# OCEAN-X (SAGAR-VIEW)
+# SAGAR-VIEW (SAGAR-VIEW)
 ### 3D Ocean Intelligence & In-Situ Observation Platform
 **Smart India Hackathon 2026 — Problem Statement PS26067**  
 **Sponsoring Organization:** Ministry of Earth Sciences — Indian National Centre for Ocean Information Services (INCOIS)
@@ -15,8 +15,8 @@
 ## 📑 Table of Contents
 
 1. [The Problem Statement & Scientific Challenge](#1-the-problem-statement--scientific-challenge)
-2. [The OCEAN-X Solution Architecture](#2-the-ocean-x-solution-architecture)
-3. [What Data OCEAN-X Displays & Provenance](#3-what-data-ocean-x-displays--provenance)
+2. [The SAGAR-VIEW Solution Architecture](#2-the-SAGAR-VIEW-solution-architecture)
+3. [What Data SAGAR-VIEW Displays & Provenance](#3-what-data-SAGAR-VIEW-displays--provenance)
 4. [Live Deployment & Public Access Links](#4-live-deployment--public-access-links)
 5. [Complete Desktop Setup & Local Installation Guide](#5-complete-desktop-setup--local-installation-guide)
 6. [Operational Manual (How to Operate Everything)](#6-operational-manual-how-to-operate-everything)
@@ -54,12 +54,12 @@ Physical oceanographers, operational forecasters, and disaster management author
 
 ---
 
-## 2. The OCEAN-X Solution Architecture
+## 2. The SAGAR-VIEW Solution Architecture
 
-OCEAN-X bridges the gap between numerical simulation and physical observation by pairing an asynchronous **FastAPI + xarray** calculation server with a hardware-accelerated **React 19 + Three.js** WebGL client.
+SAGAR-VIEW bridges the gap between numerical simulation and physical observation by pairing an asynchronous **FastAPI + xarray** calculation server with a hardware-accelerated **React 19 + Three.js** WebGL client.
 
 ```
-                                OCEAN-X SYSTEM ARCHITECTURE
+                                SAGAR-VIEW SYSTEM ARCHITECTURE
 
   +---------------------------------------------------------------------------------------+
   |                                   CLIENT VIEWPORT                                     |
@@ -113,9 +113,9 @@ OCEAN-X bridges the gap between numerical simulation and physical observation by
 
 ---
 
-## 3. What Data OCEAN-X Displays & Provenance
+## 3. What Data SAGAR-VIEW Displays & Provenance
 
-OCEAN-X visualizes operational multi-sensor oceanographic data across space ($0^\circ-28^\circ\text{N}$, $60^\circ-100^\circ\text{E}$), depth ($0-500\text{ m}$), and time:
+SAGAR-VIEW visualizes operational multi-sensor oceanographic data across space ($0^\circ-28^\circ\text{N}$, $60^\circ-100^\circ\text{E}$), depth ($0-500\text{ m}$), and time:
 
 | Dataset / Variable | Physical Parameter | Units | Visualization | Source & Provenance |
 | :--- | :--- | :---: | :--- | :--- |
@@ -166,7 +166,7 @@ All numbers below come from the running system on live/real data (22 Sep 2026 ru
 | **Local Wi-Fi Network** | **`http://<YOUR-LOCAL-IP>:5173/`** | Testing on mobile devices or laptops connected to same Wi-Fi |
 | **FastAPI Interactive Docs** | **[http://localhost:8000/docs](http://localhost:8000/docs)** | Complete Swagger UI for testing all 12 REST API endpoints |
 | **Backend Health Check** | **[http://localhost:8000/api/health](http://localhost:8000/api/health)** | Live system telemetry and platform counts |
-| **GitHub Repository** | **[https://github.com/skm127/OceanX](https://github.com/skm127/OceanX)** | Official open-source repository on branch `main` |
+| **GitHub Repository** | **[https://github.com/skm127/SAGAR-VIEW](https://github.com/skm127/SAGAR-VIEW)** | Official open-source repository on branch `main` |
 
 ---
 
@@ -195,8 +195,8 @@ git --version     # Should output 2.x
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/skm127/OceanX.git
-cd OceanX
+git clone https://github.com/skm127/SAGAR-VIEW.git
+cd SAGAR-VIEW
 ```
 
 ---
@@ -308,7 +308,7 @@ This builds and launches both the frontend web app on port `5173` and the FastAP
 
 ## 7. Product Modes Walkthrough
 
-Located in the top header bar, OCEAN-X features five specialized operational modes:
+Located in the top header bar, SAGAR-VIEW features five specialized operational modes:
 
 ### 1. 🧑‍🔬 Research Workstation (Default Mode)
 Designed for physical oceanographers and numerical modelers:
@@ -430,7 +430,7 @@ An operational metadata inspector for scientific validation:
 ## 12. Project Structure & Technology Stack
 
 ```
-OceanX/
+SAGAR-VIEW/
 ├── .github/workflows/ci.yml        # Automated GitHub Actions CI pipeline
 ├── backend/                        # FastAPI Python 3.11 backend
 │   ├── app/
