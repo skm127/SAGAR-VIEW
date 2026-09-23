@@ -1,0 +1,336 @@
+/* OceanDossierModal.css */
+.ocean-dossier-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(6, 16, 24, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 250;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: dossierFade 0.2s ease-out;
+}
+
+@keyframes dossierFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ocean-dossier-card {
+  width: 90%;
+  max-width: 520px;
+  background: rgba(11, 24, 34, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 229, 255, 0.18);
+  color: #E8F1F5;
+  overflow: hidden;
+  animation: dossierZoom 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dossierZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dossier-header {
+  padding: 16px 20px;
+  background: rgba(16, 35, 47, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dossier-badge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dossier-type-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #00E5FF;
+}
+
+.dossier-date-tag {
+  font-size: 10px;
+  color: #8DA5B2;
+  font-family: monospace;
+}
+
+.dossier-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dossier-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+  margin: 0 0 4px 0;
+}
+
+.dossier-coord {
+  font-size: 12px;
+  font-family: 'Geist Mono', monospace;
+  color: #00E5FF;
+}
+
+.dossier-close-btn {
+  background: transparent;
+  border: none;
+  color: #8DA5B2;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.dossier-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.dossier-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+  color: #8DA5B2;
+  font-size: 13px;
+}
+
+.dossier-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(0, 229, 255, 0.2);
+  border-top-color: #00E5FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dossier-error {
+  padding: 20px;
+  color: #FF5252;
+  font-size: 13px;
+  background: rgba(255, 82, 82, 0.1);
+  margin: 16px;
+  border-radius: 6px;
+}
+
+.dossier-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dossier-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dossier-metric-box {
+  background: rgba(6, 16, 24, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.box-label {
+  font-size: 9px;
+  color: #8DA5B2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.box-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.box-val {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'Geist Mono', monospace;
+  color: #E8F1F5;
+}
+
+.box-val.temp { color: #FF7043; }
+.box-val.sal { color: #42A5F5; }
+.box-val.current { color: #26A69A; }
+.box-val.error-high { color: #FF5252; }
+.box-val.error-low { color: #00E676; }
+
+.box-dir {
+  font-size: 12px;
+  font-weight: 600;
+  color: #00E5FF;
+}
+
+.box-sub {
+  font-size: 9px;
+  color: #8DA5B2;
+}
+
+.dossier-context-banner {
+  background: rgba(16, 35, 47, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.context-title {
+  font-size: 8px;
+  font-weight: 700;
+  color: #8DA5B2;
+  letter-spacing: 0.05em;
+}
+
+.context-model {
+  font-size: 11px;
+  color: #E8F1F5;
+}
+
+.context-obs-count {
+  font-size: 11px;
+  font-family: monospace;
+  color: #00E5FF;
+}
+
+.dossier-floats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.floats-header {
+  font-size: 9px;
+  color: #8DA5B2;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.floats-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.float-chip {
+  background: rgba(16, 35, 47, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.float-chip:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00E5FF;
+  transform: translateY(-1px);
+}
+
+.chip-name {
+  font-size: 10px;
+  font-family: monospace;
+  color: #E8F1F5;
+}
+
+.chip-dist {
+  font-size: 9px;
+  color: #8DA5B2;
+}
+
+.dossier-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.dossier-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dossier-btn.primary {
+  background: #00E5FF;
+  color: #061018;
+}
+
+.dossier-btn.primary:hover {
+  background: #33EBFF;
+  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+}
+
+.dossier-btn.secondary {
+  background: rgba(255, 179, 0, 0.15);
+  border: 1px solid #FFB300;
+  color: #FFB300;
+}
+
+.dossier-btn.secondary:hover {
+  background: rgba(255, 179, 0, 0.25);
+  color: #FFFFFF;
+}
+
+.dossier-btn.outline {
+  background: rgba(16, 35, 47, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8DA5B2;
+}
+
+.dossier-btn.outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #E8F1F5;
+  border-color: rgba(255, 255, 255, 0.2);
+}

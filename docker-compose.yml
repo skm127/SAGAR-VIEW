@@ -1,0 +1,83 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/health > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - oceanx_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro
+      - ./backend/app:/app/app
+    environment:
+      - DATA_DIR=/app/data
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      - DEBUG=false
+      # AI Guide (SAGAR AI); empty default degrades gracefully to fallback mode
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://localhost:8000/api/health/ready')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - oceanx_net
+
+  db:
+    profiles: ["full"]
+    image: postgis/postgis:17-3.5
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: oceanx
+      POSTGRES_USER: oceanx
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-oceanx_local_only}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oceanx -d oceanx"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oceanx_net
+
+  redis:
+    profiles: ["full"]
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oceanx_net
+
+volumes:
+  pgdata:
+
+networks:
+  oceanx_net:
+    driver: bridge

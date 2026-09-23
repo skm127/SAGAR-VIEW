@@ -1,0 +1,63 @@
+.live-conn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 10, 10, 0.5);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 5px 12px;
+  border-radius: 9999px;
+  z-index: 150;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  color: var(--text-muted, #71717a);
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.live-conn-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #52525b;
+}
+
+.live-conn-indicator.connected {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim, #a1a1aa);
+}
+.live-conn-indicator.connected .live-conn-dot {
+  background: #22c55e;
+  animation: pulse-conn 2.5s infinite ease-in-out;
+}
+
+.live-conn-indicator.connecting,
+.live-conn-indicator.reconnecting {
+  color: var(--text-muted, #71717a);
+}
+.live-conn-indicator.connecting .live-conn-dot,
+.live-conn-indicator.reconnecting .live-conn-dot {
+  background: #eab308;
+  animation: pulse-conn 1.2s infinite ease-in-out;
+}
+
+.live-conn-indicator.disconnected {
+  color: #a1a1aa;
+}
+.live-conn-indicator.disconnected .live-conn-dot {
+  background: #ef4444;
+}
+
+@keyframes pulse-conn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.live-conn-model-date {
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim, #a1a1aa);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}

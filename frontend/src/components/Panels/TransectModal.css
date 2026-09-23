@@ -1,0 +1,266 @@
+/* TransectModal.css */
+.transect-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(6, 16, 24, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 250;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: modalFade 0.2s ease-out;
+}
+
+.transect-modal-card {
+  width: 92%;
+  max-width: 680px;
+  background: rgba(11, 24, 34, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 229, 255, 0.18);
+  color: #E8F1F5;
+  overflow: hidden;
+  animation: modalZoom 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.transect-header {
+  padding: 16px 22px;
+  background: rgba(16, 35, 47, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.transect-badge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.transect-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #00E5FF;
+}
+
+.transect-var-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.var-pill {
+  background: rgba(6, 16, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #8DA5B2;
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.var-pill.active {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00E5FF;
+  color: #00E5FF;
+  font-weight: 600;
+}
+
+.transect-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.transect-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+  margin: 0 0 4px 0;
+}
+
+.transect-coords {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: #8DA5B2;
+}
+
+.transect-close-btn {
+  background: transparent;
+  border: none;
+  color: #8DA5B2;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.transect-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.transect-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 22px;
+  background: rgba(6, 16, 24, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.transect-body {
+  padding: 20px 22px;
+}
+
+.transect-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 12px;
+  color: #8DA5B2;
+}
+
+.transect-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(0, 229, 255, 0.2);
+  border-top-color: #00E5FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.transect-error {
+  padding: 14px;
+  color: #FF5252;
+  background: rgba(255, 82, 82, 0.1);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.axis-dist-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-family: monospace;
+  color: #8DA5B2;
+  margin-bottom: 6px;
+  padding: 0 4px 0 46px;
+}
+
+.transect-plot-stage {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  height: 200px;
+}
+
+.axis-depth {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 9px;
+  font-family: monospace;
+  color: #8DA5B2;
+  width: 38px;
+  text-align: right;
+  user-select: none;
+}
+
+.transect-canvas-wrap {
+  position: relative;
+  flex: 1;
+  background: #061018;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.transect-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cursor-vline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.cursor-hline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.cursor-readout {
+  position: absolute;
+  background: rgba(11, 24, 34, 0.95);
+  border: 1px solid #00E5FF;
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.readout-dist {
+  font-size: 9px;
+  color: #8DA5B2;
+}
+
+.readout-depth {
+  font-size: 10px;
+  color: #E8F1F5;
+  font-weight: 600;
+}
+
+.readout-val {
+  font-size: 12px;
+  color: #00E5FF;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.transect-legend-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-left: 46px;
+}
+
+.legend-label {
+  font-size: 10px;
+  font-family: monospace;
+  color: #8DA5B2;
+  white-space: nowrap;
+}
+
+.legend-gradient {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

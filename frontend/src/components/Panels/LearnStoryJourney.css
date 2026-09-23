@@ -1,0 +1,315 @@
+/* Learn Story Journey - Dark C2 Command & Control Theme */
+
+.learn-journey-overlay {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  width: calc(100% - 32px);
+  max-width: 520px;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.learn-journey-card {
+  width: 100%;
+  max-width: 520px;
+  background: #0a1628ee;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 180, 255, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  pointer-events: auto;
+  animation: ljFadeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f1f5f9;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+}
+
+@keyframes ljFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header */
+.lj-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.lj-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lj-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+}
+
+.lj-progress {
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+}
+
+.lj-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.lj-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  transform: rotate(90deg);
+}
+
+/* Step Indicators */
+.lj-step-indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.lj-step-indicators::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: rgba(100, 180, 255, 0.12);
+  z-index: 0;
+  transform: translateY(-50%);
+}
+
+.lj-step-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.lj-step-dot:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 10, 0.95);
+  transform: translateY(-2px);
+}
+
+.lj-step-dot.active {
+  border-color: var(--text-dim, #a1a1aa);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.1);
+  transform: scale(1.12);
+}
+
+.lj-step-dot.completed {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.lj-step-dot.completed::after {
+  content: '✓';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 13px;
+  height: 13px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  border: 1.5px solid #0a1628;
+  line-height: 1;
+}
+
+/* Content Area */
+.lj-content {
+  text-align: center;
+  padding: 4px 6px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lj-step-icon {
+  font-size: 34px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+  line-height: 1.2;
+}
+
+.lj-step-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+}
+
+.lj-step-subtitle {
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.lj-step-description {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 14px 0;
+  text-align: left;
+}
+
+/* Highlight Box */
+.lj-highlight {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: left;
+  line-height: 1.45;
+}
+
+.lj-highlight-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Navigation */
+.lj-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(100, 180, 255, 0.12);
+}
+
+.lj-nav-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lj-nav-btn.prev {
+  background: transparent;
+  border: 1px solid rgba(100, 180, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lj-nav-btn.prev:hover:not(:disabled) {
+  background: rgba(100, 180, 255, 0.1);
+  border-color: rgba(100, 180, 255, 0.45);
+  color: #ffffff;
+}
+
+.lj-nav-btn.next {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #030712;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+}
+
+.lj-nav-btn.next:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: var(--text-dim, #a1a1aa);
+  box-shadow: none;
+}
+
+.lj-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .learn-journey-card {
+    padding: 16px;
+  }
+
+  .lj-step-indicators {
+    gap: 10px;
+  }
+
+  .lj-step-dot {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .lj-step-title {
+    font-size: 17px;
+  }
+}

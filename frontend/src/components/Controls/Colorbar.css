@@ -1,0 +1,44 @@
+.colorbar {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-width: 200px;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: 'Geist Mono', ui-monospace, Menlo, monospace;
+}
+
+.colorbar-label {
+  font-size: 9px;
+  color: var(--text-dim, #a1a1aa);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.colorbar-gradient {
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.colorbar-ticks {
+  position: relative;
+  height: 14px;
+  margin-top: 3px;
+}
+
+.colorbar-tick {
+  position: absolute;
+  font-size: 9px;
+  color: #94a3b8;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

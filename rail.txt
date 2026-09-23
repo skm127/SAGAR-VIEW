@@ -1,0 +1,397 @@
+1: /**
+2:  * LayerRail.tsx
+3:  * PRD Section 6: Persistent Left Layer Rail inspired by OSIRIS.
+4:  * Manages active scientific feeds across Model, Observations, Satellite, and Environment.
+5:  */
+6: import React, { useState } from 'react';
+7: import {
+8:   ChevronLeft,
+9:   ChevronRight,
+10:   ChevronDown,
+11:   Layers,
+12:   Thermometer,
+13:   Droplets,
+14:   Waves,
+15:   Radio,
+16:   Navigation,
+17:   Anchor,
+18:   Satellite,
+19:   Activity,
+20:   Wind,
+21:   Flame,
+22: } from 'lucide-react';
+23: import type { OceanVariable } from '../../types';
+24: import './LayerRail.css';
+25: 
+26: interface LayerRailProps {
+27:   variable: OceanVariable;
+28:   depth: number;
+29:   showCurrents: boolean;
+30:   opacity: number;
+31:   showArgo: boolean;
+32:   showBuoys?: boolean;
+33:   showGliders?: boolean;
+34:   argoCount?: number;
+35:   buoyCount?: number;
+36:   gliderCount?: number;
+37:   showSST: boolean;
+38:   showCyclones: boolean;
+39:   showTCHP?: boolean;
+40:   showVolumetricBlock?: boolean;
+41:   verticalExaggeration?: number;
+42:   onVariableChange: (v: OceanVariable) => void;
+43:   onToggleCurrents: () => void;
+44:   onToggleArgo: () => void;
+45:   onToggleBuoys?: () => void;
+46:   onToggleGliders?: () => void;
+47:   onToggleSST: () => void;
+48:   onToggleCyclones: () => void;
+49:   onToggleTCHP?: () => void;
+50:   onCycloneSeasonView?: () => void;
+51:   onToggleVolumetricBlock?: () => void;
+52:   onVerticalExaggerationChange?: (ex: number) => void;
+53:   onOpacityChange: (op: number) => void;
+54:   onOpenTransect: () => void;
+55:   onOpenRegionAnalysis: () => void;
+56:   isOpen: boolean;
+57:   onToggleOpen: () => void;
+58: }
+59: 
+60: export const LayerRail: React.FC<LayerRailProps> = ({
+61:   variable,
+62:   depth,
+63:   showCurrents,
+64:   opacity,
+65:   showArgo,
+66:   showBuoys,
+67:   showGliders,
+68:   argoCount,
+69:   buoyCount,
+70:   gliderCount,
+71:   showSST,
+72:   showCyclones,
+73:   showTCHP = false,
+74:   showVolumetricBlock = true,
+75:   verticalExaggeration = 1.0,
+76:   onVariableChange,
+77:   onToggleCurrents,
+78:   onToggleArgo,
+79:   onToggleBuoys,
+80:   onToggleGliders,
+81:   onToggleSST,
+82:   onToggleCyclones,
+83:   onToggleTCHP = () => {},
+84:   onCycloneSeasonView,
+85:   onToggleVolumetricBlock = () => {},
+86:   onVerticalExaggerationChange = () => {},
+87:   onOpacityChange,
+88:   onOpenTransect,
+89:   onOpenRegionAnalysis,
+90:   isOpen,
+91:   onToggleOpen,
+92: }) => {
+93: 
+94:   const [modelExpanded, setModelExpanded] = useState(true);
+95:   const [obsExpanded, setObsExpanded] = useState(true);
+96:   const [satExpanded, setSatExpanded] = useState(false);
+97:   const [envExpanded, setEnvExpanded] = useState(false);
+98: 
+99:   return (
+100:     <aside className={`layer-rail ${isOpen ? 'open' : 'collapsed'}`}>
+101:       {/* Rail Tab Toggle Button */}
+102:       <button
+103:         className="layer-rail-toggle-btn"
+104:         onClick={onToggleOpen}
+105:         title={isOpen ? 'Collapse Layer Rail (Key: L)' : 'Expand Layer Rail (Key: L)'}
+106:       >
+107:         <span className="rail-toggle-icon">{isOpen ? <ChevronLeft size={12} /> : <ChevronRight size={12} />}</span>
+108:         <span className="rail-toggle-text">LAYERS</span>
+109:       </button>
+110: 
+111:       {isOpen && (
+112:         <div className="layer-rail-content">
+113:           {/* Header (Fixed) */}
+114:           <div className="layer-rail-header">
+115:             <div className="layer-rail-title">
+116:               <Layers className="rail-icon" size={16} />
+117:               <span>SCIENTIFIC FEEDS</span>
+118:             </div>
+119:             <span className="rail-active-count">{activeFeeds} LIVE</span>
+120:           </div>
+121: 
+122:           {/* Tools Strip (Fixed) */}
+123:           <div className="rail-tools-strip">
+124:             <button
+125:               className="rail-tool-btn"
+126:               onClick={onOpenRegion || onOpenRegionAnalysis}
+127:               title="Draw Box (Key: R)"
+128:             >
+129:               REGION
+130:             </button>
+131:             <button
+132:               className="rail-tool-btn"
+133:               onClick={onOpenTransect}
+134:               title="Draw Transect (Key: T)"
+135:             >
+136:               TRANSECT
+137:             </button>
+138:             {onCycloneSeasonView && (
+139:               <button
+140:                 className="rail-tool-btn cyclone-btn"
+141:                 onClick={onCycloneSeasonView}
+142:                 title="Bay of Bengal Cyclone Season View (Pan to 12°N, 88°E, Depth 0m, Enable TCHP)"
+143:                 style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+144:               >
+145:                 <Wind size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: '4px' }} />
+146:                 CYCLONE
+147:               </button>
+148:             )}
+149:           </div>
+150: 
+151:           <div className="layer-rail-scroll-area">
+152: 
+153:           {/* Opacity Control */}
+154:           <div className="rail-slider-group">
+155:             <div className="rail-slider-label">
+156:               <span>LAYER OPACITY</span>
+157:               <span>{Math.round(opacity * 100)}%</span>
+158:             </div>
+159:             <input
+160:               type="range"
+161:               min="0.1"
+162:               max="1"
+163:               step="0.02"
+164:               value={opacity}
+165:               onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
+166:               className="rail-range"
+167:             />
+168:           </div>
+169: 
+170:           {/* 3D Subsurface Volume Block Control matching Image 1 & 2 */}
+171:           <div className="rail-slider-group">
+172:             <div className="rail-slider-label">
+173:               <span>3D VOLUME SLABS</span>
+174:               <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+175:                 <input
+176:                   type="checkbox"
+177:                   checked={showVolumetricBlock}
+178:                   onChange={onToggleVolumetricBlock}
+179:                   style={{ accentColor: '#00E5FF' }}
+180:                 />
+181:                 <span style={{ color: '#00E5FF', fontSize: '9px' }}>{showVolumetricBlock ? 'ON' : 'OFF'}</span>
+182:               </label>
+183:             </div>
+184:             <div className="rail-slider-label" style={{ marginTop: '4px' }}>
+185:               <span>VERTICAL EXAGGERATION</span>
+186:               <span>{verticalExaggeration.toFixed(1)}x</span>
+187:             </div>
+188:             <input
+189:               type="range"
+190:               min="0.5"
+191:               max="4.0"
+192:               step="0.1"
+193:               value={verticalExaggeration}
+194:               onChange={(e) => onVerticalExaggerationChange(parseFloat(e.target.value))}
+195:               className="rail-range"
+196:             />
+197:           </div>
+198: 
+199:           {/* Group 1: Numerical Model */}
+200:           <div className="feed-category">
+201:             <div
+202:               className="category-header"
+203:               onClick={() => setModelExpanded(!modelExpanded)}
+204:             >
+205:               <span className="category-title">NUMERICAL MODEL (NEMO 4D)</span>
+206:               <span className="category-arrow">{modelExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</span>
+207:             </div>
+208:             {modelExpanded && (
+209:               <div className="category-items">
+210:                 <label
+211:                   className={`feed-item ${variable === 'thetao' ? 'active' : ''}`}
+212:                 >
+213:                   <input
+214:                     type="radio"
+215:                     name="model_var"
+216:                     checked={variable === 'thetao'}
+217:                     onChange={() => onVariableChange('thetao')}
+218:                   />
+219:                   <span className="feed-label">
+220:                     <Thermometer size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+221:                     Temperature (θ)
+222:                   </span>
+223:                   <span className="feed-badge">°C</span>
+224:                 </label>
+225: 
+226:                 <label
+227:                   className={`feed-item ${variable === 'so' ? 'active' : ''}`}
+228:                 >
+229:                   <input
+230:                     type="radio"
+231:                     name="model_var"
+232:                     checked={variable === 'so'}
+233:                     onChange={() => onVariableChange('so')}
+234:                   />
+235:                   <span className="feed-label">
+236:                     <Droplets size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+237:                     Salinity (S)
+238:                   </span>
+239:                   <span className="feed-badge">PSU</span>
+240:                 </label>
+241: 
+242:                 <label
+243:                   className={`feed-item ${showCurrents ? 'active' : ''}`}
+244:                 >
+245:                   <input
+246:                     type="checkbox"
+247:                     checked={showCurrents}
+248:                     onChange={onToggleCurrents}
+249:                   />
+250:                   <span className="feed-label">
+251:                     <Waves size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+252:                     3D Current Vectors
+253:                   </span>
+254:                   <span className="feed-badge cyan">VECTORS</span>
+255:                 </label>
+256:               </div>
+257:             )}
+258:           </div>
+259: 
+260:           {/* Group 2: In-Situ Observations */}
+261:           <div className="feed-category">
+262:             <div
+263:               className="category-header"
+264:               onClick={() => setObsExpanded(!obsExpanded)}
+265:             >
+266:               <span className="category-title">IN-SITU OBSERVATIONS</span>
+267:               <span className="category-arrow">{obsExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</span>
+268:             </div>
+269:             {obsExpanded && (
+270:               <div className="category-items">
+271:                 <label
+272:                   className={`feed-item ${showArgo ? 'active' : ''}`}
+273:                 >
+274:                   <input
+275:                     type="checkbox"
+276:                     checked={showArgo}
+277:                     onChange={onToggleArgo}
+278:                   />
+279:                   <span className="feed-label">
+280:                     <Radio size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+281:                     Argo Profiling Fleet
+282:                   </span>
+283:                   <span className="feed-badge green">LIVE ({argoCount ?? 0})</span>
+284:                 </label>
+285: 
+286:                 <label className={`feed-item ${showGliders ?? showArgo ? 'active' : ''}`} title="Autonomous Glider feed">
+287:                   <input type="checkbox" checked={showGliders ?? showArgo} onChange={onToggleGliders ?? onToggleArgo} />
+288:                   <span className="feed-label">
+289:                     <Navigation size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+290:                     Ocean Gliders
+291:                   </span>
+292:                   <span className="feed-badge green">LIVE ({gliderCount ?? 0})</span>
+293:                 </label>
+294: 
+295:                 <label className={`feed-item ${showBuoys ?? showArgo ? 'active' : ''}`} title="Moored buoy arrays">
+296:                   <input type="checkbox" checked={showBuoys ?? showArgo} onChange={onToggleBuoys ?? onToggleArgo} />
+297:                   <span className="feed-label">
+298:                     <Anchor size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+299:                     Moored Buoys (OMNI)
+300:                   </span>
+301:                   <span className="feed-badge green">LIVE ({buoyCount ?? 0})</span>
+302:                 </label>
+303:               </div>
+304:             )}
+305:           </div>
+306: 
+307:           {/* Group 3: Satellite Data */}
+308:           <div className="feed-category">
+309:             <div
+310:               className="category-header"
+311:               onClick={() => setSatExpanded(!satExpanded)}
+312:             >
+313:               <span className="category-title">SATELLITE TELEMETRY</span>
+314:               <span className="category-arrow">{satExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</span>
+315:             </div>
+316:             {satExpanded && (
+317:               <div className="category-items">
+318:                 <label
+319:                   className={`feed-item ${showSST ? 'active' : ''}`}
+320:                 >
+321:                   <input
+322:                     type="checkbox"
+323:                     checked={showSST}
+324:                     onChange={onToggleSST}
+325:                   />
+326:                   <span className="feed-label">
+327:                     <Satellite size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+328:                     MODIS Infrared SST
+329:                   </span>
+330:                   <span className="feed-badge">NASA</span>
+331:                 </label>
+332: 
+333:                 <label className="feed-item disabled" title="Sea Level Anomaly standby">
+334:                   <input type="checkbox" disabled />
+335:                   <span className="feed-label muted">
+336:                     <Activity size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+337:                     Sea Level Anomaly (SLA)
+338:                   </span>
+339:                   <span className="feed-badge faint">ALTIMETRY</span>
+340:                 </label>
+341:               </div>
+342:             )}
+343:           </div>
+344: 
+345:           {/* Group 4: Environment & Disasters */}
+346:           <div className="feed-category">
+347:             <div
+348:               className="category-header"
+349:               onClick={() => setEnvExpanded(!envExpanded)}
+350:             >
+351:               <span className="category-title">HAZARDS & ENVIRONMENT</span>
+352:               <span className="category-arrow">{envExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</span>
+353:             </div>
+354:             {envExpanded && (
+355:               <div className="category-items">
+356:                 <label
+357:                   className={`feed-item ${showCyclones ? 'active' : ''}`}
+358:                 >
+359:                   <input
+360:                     type="checkbox"
+361:                     checked={showCyclones}
+362:                     onChange={onToggleCyclones}
+363:                   />
+364:                   <span className="feed-label">
+365:                     <Wind size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+366:                     Cyclone Track Hazards
+367:                   </span>
+368:                   <span className="feed-badge red">IMD/JTWC</span>
+369:                 </label>
+370: 
+371:                 <label
+372:                   className={`feed-item ${showTCHP ? 'active' : ''}`}
+373:                 >
+374:                   <input
+375:                     type="checkbox"
+376:                     checked={showTCHP}
+377:                     onChange={onToggleTCHP}
+378:                   />
+379:                   <span className="feed-label">
+380:                     <Flame size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+381:                     Cyclone Heat Potential (TCHP)
+382:                   </span>
+383:                   <span className="feed-badge orange">TCHP &gt; 50</span>
+384:                 </label>
+385:               </div>
+386:             )}
+387:           </div>
+388: 
+389:           </div>
+390:         </div>
+391:       )}
+392:     </aside>
+393:   );
+394: };
+395: 
+396: export default LayerRail;
+397: 

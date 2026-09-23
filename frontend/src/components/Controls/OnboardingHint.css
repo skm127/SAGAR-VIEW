@@ -1,0 +1,116 @@
+.onboarding-hint-card {
+  position: fixed;
+  bottom: 96px;
+  left: 280px;
+  max-width: 380px;
+  background: rgba(10, 20, 38, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 16px rgba(0, 229, 255, 0.2);
+  /* Below the AI guide panel (z-index 1000) so the user-opened guide always
+     wins click priority where the two overlap on small viewports. */
+  z-index: 40;
+  animation: hintSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes hintSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.onboarding-hint-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.onboarding-icon {
+  font-size: 15px;
+  margin-right: 6px;
+}
+
+.onboarding-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #00e5ff;
+  flex: 1;
+}
+
+.onboarding-close-x {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.onboarding-close-x:hover {
+  color: #f1f5f9;
+}
+
+.onboarding-hint-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 0 0 10px 0;
+}
+
+.onboarding-hint-text strong {
+  color: #f8fafc;
+}
+
+.onboarding-hint-text kbd {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-family: ui-monospace, monospace;
+  color: var(--text-dim, #a1a1aa);
+}
+
+.onboarding-hint-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.onboarding-gotit-btn {
+  background: rgba(0, 229, 255, 0.18);
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.onboarding-gotit-btn:hover {
+  background: #00e5ff;
+  color: #050b14;
+}
+
+@media (max-width: 768px) {
+  .onboarding-hint-card {
+    left: 16px;
+    right: 16px;
+    bottom: 110px;
+    max-width: none;
+  }
+}

@@ -1,0 +1,136 @@
+.info-panel {
+  position: absolute;
+  top: 64px;
+  left: 14px;
+  background: rgba(10, 10, 10, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  padding: 10px 14px;
+  min-width: 200px;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: 'Geist Mono', ui-monospace, Menlo, monospace;
+}
+
+.info-panel.with-layer-rail {
+  left: 278px;
+}
+
+.info-panel::before {
+  content: 'TELEMETRY // HUD';
+  display: block;
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim, #a1a1aa);
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  gap: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.info-label {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.info-value {
+  font-size: 11.5px;
+  color: #f0f9ff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.current-active {
+  color: #10b981;
+  text-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.info-loading {
+  color: var(--text-dim, #a1a1aa);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  animation: pulseHud 1.2s infinite;
+}
+
+.opacity-row {
+  align-items: center;
+  margin-top: 2px;
+}
+
+.opacity-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.opacity-slider {
+  width: 65px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.opacity-val {
+  font-size: 10px;
+  color: var(--text-dim, #a1a1aa);
+  font-weight: 700;
+  min-width: 26px;
+}
+
+.hud-fleet-btn {
+  margin-top: 8px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim, #a1a1aa);
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.hud-fleet-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-dim, #a1a1aa);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulseHud {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+.vite/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+
+# Data files (large)
+data/model/*.nc
+data/argo/*.nc
+!data/README.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+pgdata/
+redisdata/
+
+# Logs
+*.log
+
+# Archives & Temporary Dumps
+*.zip
+*.tar.gz
+prd_dump.txt
+prd_full.txt
+.vercel/
+.freebuff/
+backend/data/

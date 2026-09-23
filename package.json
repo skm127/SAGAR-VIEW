@@ -1,0 +1,11 @@
+{
+  "name": "ocean-x",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive 3D Ocean Intelligence & Visualization Platform // SIH26067 - INCOIS",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "preview": "npm run preview --prefix frontend"
+  }
+}

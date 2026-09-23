@@ -1,0 +1,149 @@
+/* HoverSounderHUD.css */
+.hover-sounder-hud {
+  position: absolute;
+  bottom: 18px;
+  right: 238px;
+  width: 280px;
+  background: rgba(11, 24, 34, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 229, 255, 0.15);
+  color: #E8F1F5;
+  padding: 10px 14px;
+  z-index: 100;
+  pointer-events: none;
+  animation: hoverHudFade 0.18s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@keyframes hoverHudFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hover-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hover-coord-text {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: #00E5FF;
+  font-weight: 600;
+}
+
+.hover-status-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.hover-status-pill.critical {
+  background: rgba(255, 82, 82, 0.2);
+  color: #FF5252;
+  border: 1px solid #FF5252;
+}
+
+.hover-status-pill.nominal {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00E676;
+  border: 1px solid rgba(0, 230, 118, 0.35);
+}
+
+.hover-status-pill.cool {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00E5FF;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+}
+
+.hover-status-pill.info {
+  background: rgba(255, 179, 0, 0.15);
+  color: #FFB300;
+  border: 1px solid rgba(255, 179, 0, 0.35);
+}
+
+.hover-value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 6px;
+}
+
+.hover-val-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hover-val-label {
+  font-size: 8px;
+  color: #8DA5B2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hover-val-num {
+  font-size: 19px;
+  font-weight: 700;
+  font-family: 'Geist Mono', monospace;
+  color: #FFFFFF;
+}
+
+.hover-unit {
+  font-size: 13px;
+  color: #00E5FF;
+}
+
+.hover-lens-tag {
+  font-size: 8px;
+  color: #8DA5B2;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.hover-desc-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hover-desc-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #E8F1F5;
+}
+
+.hover-desc-text {
+  font-size: 9.5px;
+  line-height: 1.4;
+  color: #8DA5B2;
+  margin: 0;
+}
+
+.hover-hud-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  font-family: monospace;
+  color: #8DA5B2;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 4px;
+}

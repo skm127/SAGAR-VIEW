@@ -1,0 +1,160 @@
+/* Ocean Coordinate Probe Floating Modal */
+.ocean-probe-modal {
+  position: absolute;
+  top: 60px;
+  right: 14px;
+  width: 320px;
+  background: rgba(10, 10, 10, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 36;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  animation: probeSlide 0.2s ease-out;
+}
+
+@keyframes probeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.probe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.probe-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.probe-tag {
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim, #a1a1aa);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.probe-header h3 {
+  font-size: 13px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.probe-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #a1a1aa);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.probe-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.probe-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.probe-location-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 10px;
+}
+
+.probe-region {
+  color: var(--text-dim, #a1a1aa);
+  font-weight: 700;
+}
+
+.probe-coords {
+  color: #94a3b8;
+}
+
+.probe-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.probe-stat-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.probe-stat-label {
+  font-size: 8px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.probe-stat-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim, #a1a1aa);
+}
+
+.probe-chart-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.probe-chart-title {
+  font-size: 9px;
+  color: var(--text-dim, #a1a1aa);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.probe-sparkline {
+  display: block;
+}
+
+.probe-footer-hint {
+  font-size: 8.5px;
+  color: #64748b;
+  text-align: center;
+  font-style: italic;
+}

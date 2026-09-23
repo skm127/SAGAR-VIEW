@@ -1,0 +1,26 @@
+# render.yaml — One-click deploy for Render.com
+#
+# HOW TO USE:
+#   1. Push this repo to GitHub
+#   2. Go to https://dashboard.render.com/blueprints
+#   3. Click "New Blueprint Instance" → select your OceanX repo
+#   4. Set GEMINI_API_KEY in the Render dashboard (optional, for AI chat)
+#   5. Done. Render auto-deploys on every push to main.
+
+services:
+  - type: web
+    name: oceanx
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: DATA_DIR
+        value: /app/data
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DEBUG
+        value: "false"
+    healthCheckPath: /api/health/ready

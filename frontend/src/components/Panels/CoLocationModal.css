@@ -1,0 +1,395 @@
+/* CoLocationModal.css - Spatial-Temporal Matching Modal */
+
+.coloc-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.coloc-modal {
+  background: #0a1628;
+  border: 1px solid rgba(100, 180, 255, 0.15);
+  border-radius: 12px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 188, 212, 0.08);
+  display: flex;
+  flex-direction: column;
+  animation: colocFadeIn 0.2s ease-out;
+}
+
+@keyframes colocFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Custom Scrollbar for Modal */
+.coloc-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.coloc-modal::-webkit-scrollbar-track {
+  background: rgba(10, 22, 40, 0.6);
+}
+
+.coloc-modal::-webkit-scrollbar-thumb {
+  background: rgba(100, 180, 255, 0.2);
+  border-radius: 3px;
+}
+
+.coloc-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 212, 0.4);
+}
+
+/* Header */
+.coloc-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(100, 180, 255, 0.12);
+  background: rgba(10, 22, 40, 0.95);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.coloc-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.coloc-badge {
+  color: #ffc107;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-mono, monospace);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.coloc-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.coloc-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+
+.coloc-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Body */
+.coloc-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Probed Coordinate Box */
+.coloc-probe {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(100, 180, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.coloc-probe-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.coloc-probe-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00bcd4;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.5px;
+}
+
+/* Controls */
+.coloc-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 4px 0;
+}
+
+.coloc-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.coloc-slider-group label {
+  font-size: 12px;
+  color: #cbd5e1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.coloc-slider-group label strong {
+  color: #00bcd4;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+}
+
+.coloc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(100, 180, 255, 0.15);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  accent-color: #00bcd4;
+  transition: background 0.15s;
+}
+
+.coloc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00bcd4;
+  box-shadow: 0 0 8px rgba(0, 188, 212, 0.6);
+  cursor: pointer;
+  border: 2px solid #0a1628;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.coloc-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(0, 188, 212, 0.9);
+}
+
+.coloc-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00bcd4;
+  box-shadow: 0 0 8px rgba(0, 188, 212, 0.6);
+  cursor: pointer;
+  border: 2px solid #0a1628;
+}
+
+.coloc-slider-marks {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #64748b;
+  font-family: var(--font-mono, monospace);
+  margin-top: 2px;
+}
+
+/* Search Action Button */
+.coloc-search-btn {
+  width: 100%;
+  padding: 11px 16px;
+  background: #00bcd4;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.25);
+}
+
+.coloc-search-btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.coloc-search-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.coloc-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Results */
+.coloc-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.coloc-results-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+}
+
+.coloc-empty {
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
+  padding: 24px 16px;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  border: 1px dashed rgba(100, 180, 255, 0.15);
+}
+
+/* Table */
+.coloc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: #e2e8f0;
+  font-family: var(--font-mono, monospace);
+  background: rgba(10, 22, 40, 0.5);
+  border: 1px solid rgba(100, 180, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.coloc-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(100, 180, 255, 0.15);
+  background: rgba(15, 30, 52, 0.7);
+  font-weight: 600;
+}
+
+.coloc-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(100, 180, 255, 0.06);
+  vertical-align: middle;
+}
+
+.coloc-table tbody tr {
+  transition: background 0.15s;
+}
+
+.coloc-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.coloc-table tbody tr:hover {
+  background: rgba(0, 188, 212, 0.08);
+}
+
+/* High Score Row Highlighting */
+.coloc-table tr.high-score {
+  border-left: 3px solid #22c55e;
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.coloc-sensor-id {
+  color: #00bcd4;
+  font-weight: 700;
+}
+
+/* Match Score Badges */
+.coloc-score {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  min-width: 36px;
+}
+
+.coloc-score.high {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.coloc-score.med {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.coloc-score.low {
+  background: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Jump Button */
+.coloc-jump-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 188, 212, 0.15);
+  border: 1px solid rgba(0, 188, 212, 0.4);
+  color: #00bcd4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 11px;
+  padding: 0;
+}
+
+.coloc-jump-btn:hover {
+  background: #00bcd4;
+  color: #0a1628;
+  transform: scale(1.08);
+}

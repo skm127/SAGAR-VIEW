@@ -1,0 +1,294 @@
+/* VerticalProfileHUD.css */
+.vertical-profile-hud {
+  position: absolute;
+  top: 76px;
+  right: 18px;
+  width: 290px;
+  background: rgba(11, 24, 34, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 229, 255, 0.12);
+  color: #E8F1F5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  z-index: 120;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: hudFadeSlide 0.25s ease-out;
+}
+
+@keyframes hudFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.vphud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(16, 35, 47, 0.6);
+}
+
+.vphud-title-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.vphud-icon {
+  color: #00E5FF;
+  font-size: 13px;
+}
+
+.vphud-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #E8F1F5;
+}
+
+.vphud-close-btn {
+  background: transparent;
+  border: none;
+  color: #8DA5B2;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.vphud-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+/* Top Colorbar Strip */
+.vphud-colorbar-strip {
+  padding: 8px 14px 4px 14px;
+}
+
+.vphud-colorbar-scale {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #1A237E 0%, #00B0FF 25%, #00E676 50%, #FFEA00 75%, #D50000 100%);
+  margin-bottom: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.vphud-colorbar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-family: 'Geist Mono', 'Fira Code', monospace;
+  color: #8DA5B2;
+}
+
+.vphud-var-tag {
+  color: #00E5FF;
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+/* Curve Selector */
+.vphud-curve-toggle {
+  display: flex;
+  gap: 6px;
+  padding: 6px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.curve-pill {
+  background: rgba(16, 35, 47, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #8DA5B2;
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.curve-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #E8F1F5;
+}
+
+.curve-pill.active {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00E5FF;
+  color: #00E5FF;
+  font-weight: 600;
+}
+
+.curve-pill.model.active {
+  border-color: #00E5FF;
+  color: #00E5FF;
+}
+
+.curve-pill.obs.active {
+  background: rgba(255, 68, 204, 0.15);
+  border-color: #FF44CC;
+  color: #FF44CC;
+}
+
+/* SVG Chart */
+.vphud-chart-wrap {
+  position: relative;
+  padding: 4px 10px;
+  user-select: none;
+}
+
+.vphud-svg {
+  display: block;
+  cursor: crosshair;
+  background: rgba(6, 16, 24, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.vphud-depth-tag {
+  position: absolute;
+  background: #00E5FF;
+  color: #061018;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: monospace;
+  padding: 1px 4px;
+  border-radius: 3px;
+  pointer-events: none;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+/* Telemetry Box */
+.vphud-telemetry-box {
+  padding: 10px 14px 12px 14px;
+  background: rgba(16, 35, 47, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vphud-coord-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.vphud-coord-badge {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: #E8F1F5;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vphud-layer-badge {
+  font-size: 9px;
+  color: #8DA5B2;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.vphud-readings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.vphud-metric-cell {
+  background: rgba(6, 16, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 8px;
+  color: #8DA5B2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.metric-value {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Geist Mono', monospace;
+  color: #E8F1F5;
+}
+
+.metric-value.highlight {
+  color: #FFFFFF;
+}
+
+.metric-value.cyan {
+  color: #00E5FF;
+}
+
+.metric-value.pink {
+  color: #FF3366;
+}
+
+.metric-value.amber {
+  color: #FFB300;
+}
+
+.metric-value.green {
+  color: #00E676;
+}
+
+/* Preset Buttons */
+.vphud-presets {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.presets-label {
+  font-size: 9px;
+  color: #8DA5B2;
+  margin-right: 2px;
+}
+
+.preset-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  color: #8DA5B2;
+  font-size: 9px;
+  font-family: monospace;
+  padding: 2px 5px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.preset-chip:hover {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00E5FF;
+  border-color: #00E5FF;
+}
+
+.preset-chip.active {
+  background: #00E5FF;
+  color: #061018;
+  font-weight: 700;
+  border-color: #00E5FF;
+}

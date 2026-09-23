@@ -1,0 +1,71 @@
+/* ExplainabilityToggle.css */
+.explain-toggle-container {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.explain-toggle-track {
+  display: flex;
+  background: rgba(16, 35, 47, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.explain-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #8DA5B2;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.explain-toggle-btn:hover:not(.active) {
+  color: #E8F1F5;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mode-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.mode-dot.citizen {
+  background: #00E676;
+  box-shadow: 0 0 6px rgba(0, 230, 118, 0.4);
+}
+
+.mode-dot.scientist {
+  background: #00E5FF;
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.4);
+}
+
+.explain-toggle-btn.citizen.active {
+  background: rgba(0, 230, 118, 0.15);
+  border: 1px solid rgba(0, 230, 118, 0.35);
+  color: #FFFFFF;
+}
+
+.explain-toggle-btn.scientist.active {
+  background: rgba(0, 229, 255, 0.15);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  color: #FFFFFF;
+}
+
+.explain-toggle-btn.active .mode-dot {
+  transform: scale(1.2);
+}
