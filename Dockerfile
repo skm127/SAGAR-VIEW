@@ -44,6 +44,7 @@ COPY --from=frontend-build /build/dist /app/static
 # Non-root user
 RUN addgroup --system oceanx && adduser --system --ingroup oceanx oceanx \
     && chown -R oceanx:oceanx /app/data /app/static
+ENV HOME=/app
 USER oceanx
 
 EXPOSE 8000

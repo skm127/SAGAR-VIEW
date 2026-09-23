@@ -25,3 +25,4 @@ httpx
 slowapi
 copernicusmarine>=2.0
 gunicorn>=21.2.0
+sse-starlette>=2.0.0
