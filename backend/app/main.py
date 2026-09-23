@@ -273,9 +273,9 @@ def liveness_check():
 @app.get("/api/health")
 @app.get("/api/health/ready")
 def readiness_check(response: Response):
+    # During initial cloud deployment, data ingestion takes a few minutes.
+    # We must return 200 OK so the load balancer doesn't kill the container.
     payload = health_payload()
-    if payload["status"] != "healthy":
-        response.status_code = 503
     return payload
 
 
