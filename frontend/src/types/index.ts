@@ -112,6 +112,7 @@ export interface AnomalyFleetMember {
   max_delta: number;
   max_depth: number;
   hypothesis: string;
+  advisories?: string[];
 }
 
 export interface AnomalyFleetSummary {
@@ -147,6 +148,7 @@ export interface AnomalyAnalysisResponse {
   severity: 'HIGH' | 'MEDIUM' | 'LOW';
   features: AnomalyFeatures;
   hypothesis: string;
+  advisories?: string[];
   anomalous_depths: number[];
   layer_anomalies: AnomalyLayerEntry[];
 }

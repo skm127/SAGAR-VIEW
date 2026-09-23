@@ -146,7 +146,7 @@ def data_status(request: Request):
         "argo": argo.get_info(),
         "anomaly_model": {"training_source": an.training_source, "n_training_profiles": an.n_training,
                           "trained_at": an.trained_at},
-        "moored_buoys": {"status": "not_connected", "reason": "No live RAMA/OMNI feed is publicly available (PMEL RAMA ends Feb 2026)."},
+        "moored_buoys": {"status": "live", "source": "NOAA NDBC / INCOIS Joint Portal"} if argo.get_info().get("n_moored_buoys", 0) > 0 else {"status": "not_connected", "reason": "No live RAMA/OMNI feed is publicly available (PMEL RAMA ends Feb 2026)."},
         "gliders": {"status": "not_connected", "reason": "No public glider feed for this domain."},
         "cyclones": {"live": "GDACS event API", "history": "IBTrACS v04r01"},
         "last_refresh": dict(last_refresh) or None,

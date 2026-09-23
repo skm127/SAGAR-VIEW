@@ -243,6 +243,7 @@ class AnomalyService:
             severity = "LOW"
 
         # Oceanographic root cause hypothesis
+        advisories = []
         if status == "CRITICAL_ANOMALY":
             if 80 <= features["max_layer_depth"] <= 250:
                 hypothesis = (
@@ -250,14 +251,22 @@ class AnomalyService:
                     f"Trapped thermal excess of +{features['max_delta']:.2f}°C detected at {features['max_layer_depth']}m depth. "
                     f"Thermocline gradient discrepancy of {features['thermocline_gradient_diff']:.4f}°C/m indicates intense mesoscale eddy compression."
                 )
+                advisories.append(f"Cyclone Potential: Subsurface heat pool between {max(0, int(features['max_layer_depth'] - 40))}m–{int(features['max_layer_depth'] + 40)}m prevents cold upwelling, providing fuel for rapid tropical cyclone intensification.")
+                advisories.append(f"INCOIS Action: Assimilate sensor #{profile_id} soundings into the 6-hr cycle to correct the model's mixed-layer physics at {features['max_layer_depth']}m depth.")
             elif features["max_layer_depth"] < 50:
                 hypothesis = "Intense Upper Mixed Layer Heating: Atmospheric radiative forcing divergence in numerical model."
+                advisories.append(f"Upper Layer Warming: Atmospheric radiative forcing anomaly at {features['max_layer_depth']}m. Monitor for sudden SST spike.")
+                advisories.append(f"INCOIS Action: Cross-reference with INSAT-3D SST retrievals for localized atmospheric marine heatwave confirmation.")
             else:
                 hypothesis = "Deep Mesoscale Baroclinic Displacement: Internal wave activity or deep eddy core divergence."
+                advisories.append(f"Deep Divergence: Significant internal wave activity or deep eddy core at {features['max_layer_depth']}m.")
+                advisories.append(f"INCOIS Action: Assimilate deep sounding data to correct mesoscale baroclinic structure.")
         elif status == "WARNING":
             hypothesis = "Moderate Seasonal Thermocline Displacement: Minor barrier layer salinity or seasonal warming divergence."
+            advisories.append(f"Thermocline Drift: Moderate subsurface displacement detected at {features['max_layer_depth']}m. Automated 24h tracking active.")
         else:
             hypothesis = "Model Reanalysis Concordant with Observations: In-situ sensor values verify within normal experimental tolerances."
+            advisories.append("Validation: In-situ observations match the model within tolerance at this location and time.")
 
         result = {
             "profile_id": profile_id,
@@ -267,6 +276,7 @@ class AnomalyService:
             "severity": severity,
             "features": features,
             "hypothesis": hypothesis,
+            "advisories": advisories,
             "anomalous_layer_count": len(anomalous_depths),
             "anomalous_depth_range": [min(anomalous_depths), max(anomalous_depths)] if anomalous_depths else None,
             "layer_breakdown": layer_anomalies[:40],

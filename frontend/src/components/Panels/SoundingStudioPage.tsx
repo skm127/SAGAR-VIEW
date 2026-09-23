@@ -83,24 +83,38 @@ export const SoundingStudioPage: React.FC<SoundingStudioPageProps> = ({
   // Load comparison, profile, and anomaly data
   useEffect(() => {
     if (!selectedId) return;
-    setLoading(true);
-    setError(null);
 
-    Promise.all([
-      compareProfile(selectedId, variable, timeIndex, threshold),
-      getArgoProfile(selectedId),
-      detectAnomaly(selectedId, variable, threshold, timeIndex).catch(() => null),
-    ])
-      .then(([compData, profData, anomData]) => {
-        setComparison(compData);
-        setProfile(profData);
-        setAnomalyAnalysis(anomData);
-      })
-      .catch((err) => {
-        console.error('Failed to load sounding data:', err);
-        setError(err.response?.data?.detail || err.message || 'Failed to load sounding data');
-      })
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    const fetchAll = () => {
+      setLoading(true);
+      setError(null);
+      Promise.all([
+        compareProfile(selectedId, variable, timeIndex, threshold),
+        getArgoProfile(selectedId),
+        detectAnomaly(selectedId, variable, threshold, timeIndex).catch(() => null),
+      ])
+        .then(([compData, profData, anomData]) => {
+          if (cancelled) return;
+          setComparison(compData);
+          setProfile(profData);
+          setAnomalyAnalysis(anomData);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          console.error('Failed to load sounding data:', err);
+          setError(err.response?.data?.detail || err.message || 'Failed to load sounding data');
+        })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    };
+
+    fetchAll();
+    const intervalId = setInterval(fetchAll, 45000); // refresh every 45s while open
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
   }, [selectedId, variable, timeIndex, threshold]);
 
   const unit = VARIABLE_UNITS[variable] || '';
@@ -433,9 +447,13 @@ export const SoundingStudioPage: React.FC<SoundingStudioPageProps> = ({
                 <p className="advisory-hypothesis">
                   <strong>Physical Diagnosis:</strong> {anomalyAnalysis.hypothesis}
                 </p>
-                {isCritical && (
+                {isCritical && anomalyAnalysis.advisories && anomalyAnalysis.advisories.length > 0 && (
                   <div className="advisory-action-pill">
-                    <strong>INCOIS Operational Guidance:</strong> Subsurface heat pool between 80m–220m inhibits vertical mixing and provides concentrated thermodynamic fuel for rapid tropical cyclone intensification. Assimilate sounding #{profile?.platform_id} to correct the model's mixed-layer physics.
+                    {anomalyAnalysis.advisories.map((adv, idx) => (
+                      <div key={idx} style={{ marginBottom: idx < anomalyAnalysis.advisories!.length - 1 ? '4px' : '0' }}>
+                        <strong>{adv.split(':')[0]}:</strong> {adv.split(':').slice(1).join(':').trim()}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

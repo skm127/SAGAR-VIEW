@@ -214,6 +214,18 @@
   color: #22c55e;
 }
 
+.dm-sensor-card.offline {
+  border-left-color: #64748b;
+}
+
+.dm-sensor-card.offline .dm-sensor-status {
+  color: #64748b;
+}
+
+.dm-sensor-card.active_mission {
+  border-left-color: var(--text-dim, #a1a1aa);
+}
+
 .dm-sensor-card.active_mission .dm-sensor-status {
   color: var(--text-dim, #a1a1aa);
 }

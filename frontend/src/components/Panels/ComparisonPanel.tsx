@@ -62,27 +62,39 @@ export default function ComparisonPanel({
   useModalA11y(Boolean(profileId), onClose, panelRef);
 
   useEffect(() => {
-
     if (!profileId) return;
 
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
-    Promise.all([
-      compareProfile(profileId, variable, timeIndex, threshold),
-      getArgoProfile(profileId),
-      detectAnomaly(profileId, variable, threshold, timeIndex).catch(() => null),
-    ])
-      .then(([compData, profData, anomData]) => {
-        setComparison(compData);
-        setProfile(profData);
-        setAnomalyAnalysis(anomData);
-      })
-      .catch((err) => {
-        console.error('Failed to load comparison data:', err);
-        setError(err.response?.data?.detail || err.message || 'Failed to compare');
-      })
-      .finally(() => setLoading(false));
+    const fetchAll = () => {
+      setLoading(true);
+      setError(null);
+      Promise.all([
+        compareProfile(profileId, variable, timeIndex, threshold),
+        getArgoProfile(profileId),
+        detectAnomaly(profileId, variable, threshold, timeIndex).catch(() => null),
+      ])
+        .then(([compData, profData, anomData]) => {
+          if (cancelled) return;
+          setComparison(compData);
+          setProfile(profData);
+          setAnomalyAnalysis(anomData);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          console.error('Failed to load comparison data:', err);
+          setError(err.response?.data?.detail || err.message || 'Failed to compare');
+        })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    };
+
+    fetchAll();
+    const intervalId = setInterval(fetchAll, 45000); // refresh every 45s while open
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
   }, [profileId, variable, timeIndex, threshold]);
 
   if (!profileId) return null;
@@ -264,14 +276,12 @@ export default function ComparisonPanel({
                 <AlertCircle size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
                 CYCLONE & INCOIS ACTION ADVISORY:
               </div>
-              <div className="advisory-item">
-                <span className="advisory-dot">●</span>
-                <span><strong>Cyclone Potential:</strong> Subsurface heat pool between 80m–220m prevents cold upwelling, providing fuel for rapid tropical cyclone intensification.</span>
-              </div>
-              <div className="advisory-item">
-                <span className="advisory-dot">●</span>
-                <span><strong>INCOIS Action:</strong> Assimilate Float #{profile?.platform_id} soundings into the 6-hr cycle to correct the model's mixed-layer physics.</span>
-              </div>
+              {anomalyAnalysis.advisories?.map((adv, idx) => (
+                <div key={idx} className="advisory-item">
+                  <span className="advisory-dot">●</span>
+                  <span>{adv}</span>
+                </div>
+              ))}
             </div>
           )}
           {isWarningAnomaly && (
@@ -280,10 +290,12 @@ export default function ComparisonPanel({
                 <AlertTriangle size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
                 SEASONAL MONITORING ADVISORY:
               </div>
-              <div className="advisory-item">
-                <span className="advisory-dot">●</span>
-                <span><strong>Thermocline Drift:</strong> Moderate subsurface displacement offshore Mumbai. Automated 24h tracking active.</span>
-              </div>
+              {anomalyAnalysis.advisories?.map((adv, idx) => (
+                <div key={idx} className="advisory-item">
+                  <span className="advisory-dot">●</span>
+                  <span>{adv}</span>
+                </div>
+              ))}
             </div>
           )}
           {!isCriticalAnomaly && !isWarningAnomaly && (
@@ -292,7 +304,9 @@ export default function ComparisonPanel({
                 <CheckCircle2 size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
                 VALIDATION: MODEL REANALYSIS VERIFIED
               </div>
-              <div className="advisory-text">In-situ observations match the model within tolerance at this location and time.</div>
+              <div className="advisory-text">
+                {anomalyAnalysis.advisories?.[0] || 'In-situ observations match the model within tolerance at this location and time.'}
+              </div>
             </div>
           )}
         </div>

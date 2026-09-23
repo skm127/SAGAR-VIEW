@@ -279,12 +279,14 @@ export interface DataStatusResponse {
     ingested_at?: string;
     n_argo_profiles: number;
     n_unique_floats: number;
+    n_moored_buoys?: number;
     levels_qc_passed?: number;
     levels_qc_rejected?: number;
     profiles_qc_rejected?: number;
     qc_policy?: string;
   };
   anomaly_model: { training_source: string; n_training_profiles: number; trained_at: string | null };
+  moored_buoys?: { status: string; reason?: string; source?: string };
   last_refresh: Record<string, unknown> | null;
 }
 

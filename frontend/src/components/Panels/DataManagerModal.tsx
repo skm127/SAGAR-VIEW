@@ -49,7 +49,7 @@ export const DataManagerModal: React.FC<DataManagerModalProps> = ({ onClose }) =
   const sensors = [
     { id: 'ARGO', type: 'Argo Profiling Floats (GDAC)', status: a?.n_unique_floats ? 'operational' : 'offline',
       detail: a ? `${a.n_unique_floats} floats · ${a.n_argo_profiles} QC'd profiles` : 'loading…', lastSync: a?.ingested_at },
-    { id: 'MOORINGS', type: 'RAMA / OMNI Moored Buoys', status: 'offline', detail: 'Not connected — no public live feed', lastSync: null },
+    { id: 'MOORINGS', type: 'RAMA / OMNI Moored Buoys', status: status?.moored_buoys?.status === 'live' ? 'operational' : 'offline', detail: status?.moored_buoys?.status === 'live' ? `${a?.n_moored_buoys || 'Live'} buoys (${status.moored_buoys.source})` : 'Not connected — no public live feed', lastSync: a?.ingested_at },
     { id: 'GLIDERS', type: 'Underwater Gliders', status: 'offline', detail: 'Not connected — no public live feed', lastSync: null },
   ];
 

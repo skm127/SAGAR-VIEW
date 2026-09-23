@@ -20,6 +20,7 @@ import {
   Wind,
   Flame,
   ShieldCheck,
+  CloudRain,
 } from 'lucide-react';
 import type { OceanVariable } from '../../types';
 import './LayerRail.css';
@@ -40,6 +41,8 @@ interface LayerRailProps {
   showTCHP?: boolean;
   showConfidence?: boolean;
   showVolumetricBlock?: boolean;
+  showWindy?: string | null;
+  showWeatherForecast?: boolean;
   verticalExaggeration?: number;
   onVariableChange: (v: OceanVariable) => void;
   onToggleCurrents: () => void;
@@ -47,6 +50,8 @@ interface LayerRailProps {
   onToggleBuoys?: () => void;
   onToggleGliders?: () => void;
   onToggleSST: () => void;
+  onToggleWindy?: (overlay: string | null) => void;
+  onToggleWeatherForecast?: () => void;
   onToggleCyclones: () => void;
   onToggleTCHP?: () => void;
   onToggleConfidence?: () => void;
@@ -72,7 +77,9 @@ export const LayerRail: React.FC<LayerRailProps> = ({
   buoyCount,
   gliderCount,
   showSST,
+  showWindy,
   showCyclones,
+  showWeatherForecast = false,
   showTCHP = false,
   showConfidence = false,
   showVolumetricBlock = true,
@@ -83,6 +90,8 @@ export const LayerRail: React.FC<LayerRailProps> = ({
   onToggleBuoys,
   onToggleGliders,
   onToggleSST,
+  onToggleWindy,
+  onToggleWeatherForecast = () => {},
   onToggleCyclones,
   onToggleTCHP = () => {},
   onToggleConfidence = () => {},
@@ -343,6 +352,70 @@ export const LayerRail: React.FC<LayerRailProps> = ({
                   <span className="feed-badge">NASA</span>
                 </label>
 
+                {onToggleWindy && (
+                  <>
+                    <label
+                      className={`feed-item ${showWindy === 'wind' ? 'active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={showWindy === 'wind'}
+                        onChange={() => onToggleWindy(showWindy === 'wind' ? null : 'wind')}
+                      />
+                      <span className="feed-label">
+                        <Wind size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+                        Live Radar: Wind
+                      </span>
+                      <span className="feed-badge">ECMWF</span>
+                    </label>
+
+                    <label
+                      className={`feed-item ${showWindy === 'rain' ? 'active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={showWindy === 'rain'}
+                        onChange={() => onToggleWindy(showWindy === 'rain' ? null : 'rain')}
+                      />
+                      <span className="feed-label">
+                        <Droplets size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+                        Live Radar: Rain & Thunder
+                      </span>
+                      <span className="feed-badge">ECMWF</span>
+                    </label>
+
+                    <label
+                      className={`feed-item ${showWindy === 'temp' ? 'active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={showWindy === 'temp'}
+                        onChange={() => onToggleWindy(showWindy === 'temp' ? null : 'temp')}
+                      />
+                      <span className="feed-label">
+                        <Thermometer size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+                        Live Radar: Temperature
+                      </span>
+                      <span className="feed-badge">ECMWF</span>
+                    </label>
+                    
+                    <label
+                      className={`feed-item ${showWindy === 'waves' ? 'active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={showWindy === 'waves'}
+                        onChange={() => onToggleWindy(showWindy === 'waves' ? null : 'waves')}
+                      />
+                      <span className="feed-label">
+                        <Waves size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+                        Live Radar: Waves
+                      </span>
+                      <span className="feed-badge">ECMWF</span>
+                    </label>
+                  </>
+                )}
+
                 <label className="feed-item disabled" title="Sea Level Anomaly standby">
                   <input type="checkbox" disabled />
                   <span className="feed-label muted">
@@ -379,6 +452,21 @@ export const LayerRail: React.FC<LayerRailProps> = ({
                     Cyclone Track Hazards
                   </span>
                   <span className="feed-badge red">IBTrACS + GDACS</span>
+                </label>
+
+                <label
+                  className={`feed-item ${showWeatherForecast ? 'active' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={showWeatherForecast}
+                    onChange={onToggleWeatherForecast}
+                  />
+                  <span className="feed-label">
+                    <CloudRain size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '6px' }} />
+                    Live Weather Forecast
+                  </span>
+                  <span className="feed-badge blue">ECMWF</span>
                 </label>
 
                 <label

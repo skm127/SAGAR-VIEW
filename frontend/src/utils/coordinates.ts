@@ -133,3 +133,9 @@ export function getSectorCameraPosition(sectorId: SectorId): THREE.Vector3 {
 
 export { GLOBE_RADIUS };
 
+export function basinNameFromCoords(lat: number, lon: number): string {
+  if (lon >= 80 && lon <= 94 && lat >= 10 && lat <= 22) return 'the Bay of Bengal';
+  if (lon >= 62 && lon <= 76 && lat >= 10 && lat <= 24) return 'the Arabian Sea';
+  return 'the equatorial Indian Ocean';
+}
+

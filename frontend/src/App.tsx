@@ -57,6 +57,7 @@ const MissionBriefingModal = lazy(() => import('./components/Panels/MissionBrief
 const VerticalProfileHUD = lazy(() => import('./components/Controls/VerticalProfileHUD'));
 const OceanDossierModal = lazy(() => import('./components/Panels/OceanDossierModal'));
 const RegionAnalysisModal = lazy(() => import('./components/Panels/RegionAnalysisModal'));
+import { WeatherForecastModal } from './components/Panels/WeatherForecastModal';
 
 const TransectModal = lazy(() => import('./components/Panels/TransectModal'));
 const GlobalSearchModal = lazy(() => import('./components/Panels/GlobalSearchModal'));
@@ -176,6 +177,8 @@ function App() {
   const [showBuoys, setShowBuoys] = useState(true);
   const [showGliders, setShowGliders] = useState(true);
   const [showSST, setShowSST] = useState(false);
+  const [windyOverlay, setWindyOverlay] = useState<string | null>(null);
+  const [showWeatherForecast, setShowWeatherForecast] = useState(false);
   const [showCyclones, setShowCyclones] = useState(true);
   const [showTCHP, setShowTCHP] = useState<boolean>(false);
   const [tchpSliceData, setTchpSliceData] = useState<OceanSliceData | null>(null);
@@ -847,6 +850,7 @@ function App() {
           buoyCount={buoyPlatforms.length}
           gliderCount={gliderPlatforms.length}
           showSST={showSST}
+          showWindy={windyOverlay}
           showCyclones={showCyclones}
           showTCHP={showTCHP}
           showConfidence={showConfidence}
@@ -864,8 +868,15 @@ function App() {
             if (next) {
               setVariable('thetao');
               setDepth(0);
+              setWindyOverlay(null);
             }
           }}
+          onToggleWindy={(overlay: string | null) => {
+            setWindyOverlay(overlay);
+            if (overlay) setShowSST(false);
+          }}
+          showWeatherForecast={showWeatherForecast}
+          onToggleWeatherForecast={() => setShowWeatherForecast((v) => !v)}
           onToggleCyclones={() => setShowCyclones((visible) => !visible)}
           onToggleTCHP={() => {
             const next = !showTCHP;
@@ -954,6 +965,30 @@ function App() {
           onCameraFlightComplete={() => setTargetCameraPos(null)}
         />
 
+        {/* Windy Map Overlay */}
+        {windyOverlay && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 10,
+              backgroundColor: '#000',
+              pointerEvents: 'auto',
+            }}
+          >
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=5&overlay=${windyOverlay}&product=ecmwf&level=surface&lat=22.2&lon=83.8`}
+              frameBorder="0"
+              style={{ border: 'none' }}
+              title={`Live Radar: ${windyOverlay}`}
+            ></iframe>
+          </div>
+        )}
 
         {/* Floating Vertical Profile Sounding HUD */}
         {profileHudData.isOpen && (
@@ -1291,6 +1326,14 @@ function App() {
             />
           </Suspense>
         )}
+
+        {/* Live Weather Forecast Bottom Modal */}
+        <WeatherForecastModal
+          isOpen={showWeatherForecast}
+          onClose={() => setShowWeatherForecast(false)}
+          lat={22.2}
+          lon={83.8}
+        />
 
         {/* Model Trust (depth-band skill + spatial confidence) */}
         {trustModalOpen && (
