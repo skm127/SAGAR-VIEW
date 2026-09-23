@@ -422,8 +422,21 @@ function App() {
   const platformStatusMap = useMemo(() => {
     const map: Record<string, string> = {};
     for (const f of anomalySummary?.fleet ?? []) map[f.platform_id] = f.status;
+    
+    const allPlatforms = [...argoProfiles, ...buoyPlatforms, ...gliderPlatforms];
+    for (const p of allPlatforms) {
+      for (const storm of cycloneLive) {
+        const dist = Math.hypot(p.latitude - storm.lat, p.longitude - storm.lon);
+        if (dist < 3.5) {
+          map[p.platform_id] = 'CRITICAL_ANOMALY';
+          break;
+        } else if (dist < 6.0 && map[p.platform_id] !== 'CRITICAL_ANOMALY') {
+          map[p.platform_id] = 'WARNING';
+        }
+      }
+    }
     return map;
-  }, [anomalySummary]);
+  }, [anomalySummary, argoProfiles, buoyPlatforms, gliderPlatforms, cycloneLive]);
 
   // Multi-sensor platform selection with smooth camera fly-to (Argo, Buoys, Gliders)
   const handleSelectArgo = (id: string) => {
@@ -1238,6 +1251,7 @@ function App() {
               variable={variable}
               timeIndex={timeIndex}
               explainMode={explainMode}
+              overrideStatus={platformStatusMap[selectedProfileId]}
               onClose={() => setSelectedProfileId(null)}
               onOpenFullPage={() => setProductMode('sounding')}
             />

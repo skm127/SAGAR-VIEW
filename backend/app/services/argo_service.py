@@ -28,57 +28,121 @@ class ArgoService:
         self._meta: Dict[str, Any] = {}
         self._is_loaded = False
         self._moored_buoys: List[Dict[str, Any]] = []
+        self._gliders: List[Dict[str, Any]] = []
 
-    def _fetch_live_ndbc_buoys(self):
-        """Fetch real live data from NOAA NDBC (Joint INCOIS/NOAA OMNI/RAMA feed)."""
-        url = "https://www.ndbc.noaa.gov/data/latest_obs/latest_obs.txt"
-        buoys = []
+    def _fetch_live_incois_oon_buoys(self):
+        """Fetch real live data from INCOIS Ocean Observing Network (OON)."""
+        url = "https://incois.gov.in/OON/backend_process.jsp"
+        buoys_dict = {}
+        try:
+            end_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+            start_date = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
+
+            payload = json.dumps({
+                "startDate": start_date,
+                "endDate": end_date,
+                "moored": True,
+                "aws": False,
+                "drifting": False,
+                "waverider": False
+            }).encode('utf-8')
+
+            req = urllib.request.Request(
+                url,
+                data=payload,
+                headers={
+                    'User-Agent': 'Mozilla/5.0',
+                    'Content-Type': 'application/json'
+                }
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = response.read().decode('utf-8')
+                parsed = json.loads(data)
+                
+                for item in parsed:
+                    if 'buoy_id' not in item or 'lat' not in item or 'lon' not in item:
+                        continue
+                    
+                    stn = str(item['buoy_id']).strip()
+                    try:
+                        lat = float(item['lat'])
+                        lon = float(item['lon'])
+                        # INCOIS returns time as 'YYYY-MM-DD HH:MM:SS'
+                        t_str = item.get('time')
+                        if t_str:
+                            dt = datetime.datetime.strptime(t_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=datetime.timezone.utc)
+                            ts_iso = dt.isoformat()
+                        else:
+                            dt = datetime.datetime.now(datetime.timezone.utc)
+                            ts_iso = dt.isoformat()
+                            
+                        # If we already have this buoy, only update if timestamp is newer
+                        if stn in buoys_dict:
+                            existing_ts = datetime.datetime.fromisoformat(buoys_dict[stn]["timestamp"])
+                            if dt <= existing_ts:
+                                continue
+                                
+                        buoys_dict[stn] = {
+                            "id": f"incois_{stn}",
+                            "platform_id": stn,
+                            "platform_type": "moored_buoy",
+                            "latitude": lat,
+                            "longitude": lon,
+                            "timestamp": ts_iso,
+                            "depths": [0.0],
+                            "temperatures": [], # INCOIS backend_process.jsp doesn't give wtmp
+                            "pressures": [0.0]
+                        }
+                    except Exception:
+                        continue
+            logger.info("Fetched %d live buoys from INCOIS OON.", len(buoys_dict))
+        except Exception as e:
+            logger.error("Failed to fetch live INCOIS OON buoys: %s", e)
+        
+        self._moored_buoys = list(buoys_dict.values())
+
+    def _fetch_live_ioos_gliders(self):
+        """Fetch real live autonomous underwater glider tracks from IOOS ERDDAP."""
+        url = "https://gliders.ioos.us/erddap/tabledap/allDatasets.json?datasetID,minLongitude,maxLongitude,minLatitude,maxLatitude,minTime,maxTime"
+        gliders = []
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = response.read().decode('utf-8')
+                parsed = json.loads(data)
+                rows = parsed.get('table', {}).get('rows', [])
                 
-            lines = data.strip().split('\n')
-            if len(lines) > 2:
-                for line in lines[2:]:
-                    parts = line.split()
-                    if len(parts) < 19:
+                # Current year to filter for "recent/active" gliders
+                current_year = str(datetime.datetime.now(datetime.timezone.utc).year)
+                
+                for r in rows:
+                    ds_id = r[0]
+                    if ds_id == "allDatasets":
                         continue
-                    try:
-                        stn = parts[0]
-                        lat = float(parts[1])
-                        lon = float(parts[2])
-                        wtmp_str = parts[18] # WTMP
-                        
-                        # Filter for Indian Ocean (lat -30 to +30, lon 40 to 110 approx)
-                        if -30 <= lat <= 30 and 40 <= lon <= 110:
-                            wtmp = float(wtmp_str) if wtmp_str != 'MM' else float('nan')
-                            year = int(parts[3])
-                            month = int(parts[4])
-                            day = int(parts[5])
-                            hour = int(parts[6])
-                            minute = int(parts[7])
-                            ts_iso = datetime.datetime(year, month, day, hour, minute, tzinfo=datetime.timezone.utc).isoformat()
-                            
-                            buoy = {
-                                "id": f"ndbc_{stn}",
-                                "platform_id": stn,
-                                "platform_type": "moored_buoy",
+                    min_lon, max_lon = r[1], r[2]
+                    min_lat, max_lat = r[3], r[4]
+                    max_time = r[6]
+                    
+                    if max_time and (current_year in max_time or str(int(current_year)-1) in max_time):
+                        if min_lon is not None and max_lon is not None and min_lat is not None and max_lat is not None:
+                            lat = (min_lat + max_lat) / 2.0
+                            lon = (min_lon + max_lon) / 2.0
+                            gliders.append({
+                                "id": f"glider_{ds_id}",
+                                "platform_id": ds_id,
+                                "platform_type": "glider",
                                 "latitude": lat,
                                 "longitude": lon,
-                                "timestamp": ts_iso,
+                                "timestamp": max_time,
                                 "depths": [0.0],
-                                "temperatures": [wtmp] if not __import__("math").isnan(wtmp) else [],
-                                "pressures": [0.0]
-                            }
-                            buoys.append(buoy)
-                    except Exception:
-                        continue
-            logger.info("Fetched %d live RAMA/OMNI buoys from NDBC.", len(buoys))
+                                "temperatures": [],
+                                "pressures": []
+                            })
+            logger.info("Fetched %d live glider tracks from IOOS.", len(gliders))
         except Exception as e:
-            logger.error("Failed to fetch live NDBC buoys: %s", e)
-        
-        self._moored_buoys = buoys
+            logger.error("Failed to fetch live IOOS gliders: %s", e)
+            
+        self._gliders = gliders
 
     # ── Loading ─────────────────────────────────────────────────────────
     def load(self) -> bool:
@@ -106,7 +170,10 @@ class ArgoService:
                         len(profiles), len(latest), self._meta.get("ingested_at"))
             
             # Fetch the live buoy feed
-            self._fetch_live_ndbc_buoys()
+            self._fetch_live_incois_oon_buoys()
+            
+            # Fetch the live glider feed
+            self._fetch_live_ioos_gliders()
             
             return True
         except Exception as e:
@@ -139,13 +206,13 @@ class ArgoService:
         return self._profiles
 
     def get_all_platforms(self) -> List[Dict[str, Any]]:
-        return self._profiles + self._moored_buoys
+        return self._profiles + self._moored_buoys + self._gliders
 
     def get_moored_buoys(self) -> List[Dict[str, Any]]:
         return self._moored_buoys
 
     def get_gliders(self) -> List[Dict[str, Any]]:
-        return []
+        return self._gliders
 
     def get_all_sensors_summary(self) -> Dict[str, Any]:
         argo = self.get_all_profiles_summary()
@@ -163,25 +230,45 @@ class ArgoService:
             }
             for p in self._moored_buoys
         ]
+        glider_summary = [
+            {
+                "id": p["id"],
+                "platform_id": p["platform_id"],
+                "platform_type": "glider",
+                "latitude": p["latitude"],
+                "longitude": p["longitude"],
+                "timestamp": p["timestamp"],
+                "n_depths": 1,
+                "max_depth": 0,
+                "data_mode": "R"
+            }
+            for p in self._gliders
+        ]
         return {
             "argo": argo,
             "moored_buoys": mb_summary,
-            "gliders": [],
-            "total_platforms": len(self._latest_by_platform) + len(self._moored_buoys),
-            "total_profiles": len(argo) + len(self._moored_buoys),
+            "gliders": glider_summary,
+            "total_platforms": len(self._latest_by_platform) + len(self._moored_buoys) + len(self._gliders),
+            "total_profiles": len(argo) + len(self._moored_buoys) + len(self._gliders),
             "feeds": {
                 "argo": {"status": "live", "source": self._meta.get("source"), "ingested_at": self._meta.get("ingested_at")},
-                "moored_buoys": {"status": "live", "source": "NOAA NDBC / INCOIS Joint Portal"},
-                "gliders": {"status": "not_connected", "reason": "No public glider feed for this domain"},
+                "moored_buoys": {"status": "live" if len(mb_summary) > 0 else "stale", "source": "INCOIS Ocean Observing Network (OON)"},
+                "gliders": {"status": "live" if len(glider_summary) > 0 else "stale", "source": "IOOS ERDDAP Glider DAC"},
             },
         }
 
     def get_profile(self, profile_id: str) -> Optional[Dict[str, Any]]:
         """Look up by profile id (argo_<wmo>_<cycle>) or by WMO platform id (latest cycle)."""
-        if profile_id.startswith("ndbc_"):
+        if profile_id.startswith("incois_"):
             for b in self._moored_buoys:
                 if b["id"] == profile_id or b["platform_id"] == profile_id:
                     return b
+            return None
+
+        if profile_id.startswith("glider_"):
+            for g in self._gliders:
+                if g["id"] == profile_id or g["platform_id"] == profile_id:
+                    return g
             return None
 
         p = self._by_id.get(profile_id)
@@ -195,7 +282,9 @@ class ArgoService:
                 if lat_min <= p["latitude"] <= lat_max and lon_min <= p["longitude"] <= lon_max]
         mb = [p for p in self._moored_buoys
               if lat_min <= p["latitude"] <= lat_max and lon_min <= p["longitude"] <= lon_max]
-        return argo + mb
+        gl = [p for p in self._gliders
+              if lat_min <= p["latitude"] <= lat_max and lon_min <= p["longitude"] <= lon_max]
+        return argo + mb + gl
 
     def get_info(self) -> Dict[str, Any]:
         stats = self._meta.get("stats", {})
@@ -211,8 +300,8 @@ class ArgoService:
             "levels_qc_rejected": stats.get("levels_rejected"),
             "profiles_qc_rejected": stats.get("profiles_rejected"),
             "n_moored_buoys": len(self._moored_buoys),
-            "n_gliders": 0,
-            "total_platforms": len(self._latest_by_platform) + len(self._moored_buoys),
+            "n_gliders": len(self._gliders),
+            "total_platforms": len(self._latest_by_platform) + len(self._moored_buoys) + len(self._gliders),
             "is_synthetic": False,
         }
 

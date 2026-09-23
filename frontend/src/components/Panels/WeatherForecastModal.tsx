@@ -62,6 +62,9 @@ export const WeatherForecastModal: React.FC<WeatherForecastModalProps> = ({
         </div>
 
         <div className="forecast-content">
+          <div className="windy-watermark-mask">
+            <span>LIVE FORECAST</span>
+          </div>
           <iframe
             width="100%"
             height="100%"

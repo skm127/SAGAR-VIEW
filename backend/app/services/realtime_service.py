@@ -179,6 +179,11 @@ class RealtimeOceanService:
 
                 if plat_id not in seen_platforms:
                     seen_platforms.add(plat_id)
+                    
+                    obs_time = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                    is_live = (now - obs_time).total_seconds() < 48 * 3600
+                    status = "OPERATIONAL_TRANSMITTING" if is_live else "DEGRADED"
+
                     active_platforms.append({
                         "platform_id": plat_id,
                         "type": "Argo Profiling Float",
@@ -186,7 +191,7 @@ class RealtimeOceanService:
                         "latitude": round(plat_lat, 3),
                         "longitude": round(plat_lon, 3),
                         "last_observation_utc": date_str,
-                        "status": "OPERATIONAL_TRANSMITTING",
+                        "status": status,
                         "file_uri": filepath,
                     })
 

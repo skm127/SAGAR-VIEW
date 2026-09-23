@@ -116,11 +116,11 @@ class AnomalyService:
         mask = ~np.isnan(obs_vals) & ~np.isnan(model_vals) & (depths <= 500)
         if np.sum(mask) < 5:
             return {
-                "mean_delta": 0.0,
-                "max_delta": 0.0,
-                "upper_200m_heat_delta": 0.0,
-                "thermocline_gradient_diff": 0.0,
-                "max_layer_depth": 0.0,
+                "mean_delta": None,
+                "max_delta": None,
+                "upper_200m_heat_delta": None,
+                "thermocline_gradient_diff": None,
+                "max_layer_depth": None,
             }
 
         d = depths[mask]
@@ -145,20 +145,20 @@ class AnomalyService:
         if np.any(upper_mask) and len(d[upper_mask]) > 1:
             upper_heat_delta = float(np.trapezoid(delta[upper_mask], d[upper_mask]) / 200.0)
         else:
-            upper_heat_delta = 0.0
+            upper_heat_delta = None
 
         if len(d) > 2:
             grad_obs = np.gradient(o, d)
             grad_model = np.gradient(m, d)
             thermocline_gradient_diff = float(np.max(np.abs(grad_obs - grad_model)))
         else:
-            thermocline_gradient_diff = 0.0
+            thermocline_gradient_diff = None
 
         return {
             "mean_delta": round(mean_delta, 4),
             "max_delta": round(max_delta, 4),
-            "upper_200m_heat_delta": round(upper_heat_delta, 4),
-            "thermocline_gradient_diff": round(thermocline_gradient_diff, 4),
+            "upper_200m_heat_delta": round(upper_heat_delta, 4) if upper_heat_delta is not None else None,
+            "thermocline_gradient_diff": round(thermocline_gradient_diff, 4) if thermocline_gradient_diff is not None else None,
             "max_layer_depth": round(max_layer_depth, 1),
         }
 

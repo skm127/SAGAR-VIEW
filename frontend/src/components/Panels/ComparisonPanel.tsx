@@ -37,6 +37,7 @@ interface ComparisonPanelProps {
   variable: OceanVariable;
   timeIndex: number;
   explainMode?: ExplainMode;
+  overrideStatus?: string;
   onClose: () => void;
   onOpenFullPage?: () => void;
 }
@@ -46,6 +47,7 @@ export default function ComparisonPanel({
   variable,
   timeIndex,
   explainMode = 'citizen',
+  overrideStatus,
   onClose,
   onOpenFullPage,
 }: ComparisonPanelProps) {
@@ -133,8 +135,8 @@ export default function ComparisonPanel({
     .join(' ');
 
   const anomalyCount = comparisons.filter((c) => c.anomaly_flag).length;
-  const isCriticalAnomaly = anomalyAnalysis?.status === 'CRITICAL_ANOMALY';
-  const isWarningAnomaly = anomalyAnalysis?.status === 'WARNING';
+  const isCriticalAnomaly = overrideStatus === 'CRITICAL_ANOMALY' || anomalyAnalysis?.status === 'CRITICAL_ANOMALY';
+  const isWarningAnomaly = overrideStatus === 'WARNING' || anomalyAnalysis?.status === 'WARNING';
 
   // Export handlers
   const exportJSON = () => {
@@ -256,6 +258,11 @@ export default function ComparisonPanel({
                   <AlertTriangle size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
                   MODERATE PROFILE DRIFT
                 </>
+              ) : anomalyCount > 0 ? (
+                <>
+                  <Activity size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
+                  MINOR LOCALIZED DIVERGENCE
+                </>
               ) : (
                 <>
                   <CheckCircle2 size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
@@ -299,13 +306,15 @@ export default function ComparisonPanel({
             </div>
           )}
           {!isCriticalAnomaly && !isWarningAnomaly && (
-            <div className="anomaly-advisory-box nominal-advisory">
+            <div className={`anomaly-advisory-box ${anomalyCount > 0 ? 'warning-advisory' : 'nominal-advisory'}`}>
               <div className="advisory-header">
-                <CheckCircle2 size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
-                VALIDATION: MODEL REANALYSIS VERIFIED
+                {anomalyCount > 0 ? <Activity size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} /> : <CheckCircle2 size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />}
+                {anomalyCount > 0 ? 'VALIDATION: PARTIAL DIVERGENCE OBSERVED' : 'VALIDATION: MODEL REANALYSIS VERIFIED'}
               </div>
               <div className="advisory-text">
-                {anomalyAnalysis.advisories?.[0] || 'In-situ observations match the model within tolerance at this location and time.'}
+                {anomalyCount > 0 
+                  ? `In-situ observations show some divergence from the model (${anomalyCount} anomalous layers), but the overall profile remains within global ML statistical tolerances.`
+                  : anomalyAnalysis.advisories?.[0] || 'In-situ observations match the model within tolerance at this location and time.'}
               </div>
             </div>
           )}

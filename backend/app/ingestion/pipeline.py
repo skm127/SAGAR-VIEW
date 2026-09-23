@@ -53,11 +53,15 @@ def run_refresh(settings, app_state=None, model: bool = True, argo: bool = True)
     try:
         if argo:
             result["argo"] = refresh_argo(settings)
+            if result["argo"].get("status") == "error":
+                raise RuntimeError(f"Argo ingestion failed: {result['argo'].get('message')}")
             if app_state is not None and result["argo"].get("is_live_ingested"):
                 app_state.argo_service.filepath = settings.argo_data_path
                 app_state.argo_service.load()
         if model:
             result["model"] = refresh_model(settings)
+            if result["model"].get("status") == "error":
+                raise RuntimeError(f"Model ingestion failed: {result['model'].get('message')}")
             if app_state is not None and result["model"].get("is_live_ingested"):
                 app_state.nc_service.filepath = settings.model_data_path
                 app_state.nc_service.load()
@@ -104,4 +108,16 @@ def data_needs_refresh(settings) -> Dict[str, bool]:
                 model_bad = str(ds.attrs.get("is_synthetic", "")).lower() == "true"
         except Exception:
             model_bad = True
-    return {"model": model_bad, "argo": stale(settings.argo_data_path)}
+            
+    argo_bad = stale(settings.argo_data_path)
+    if not argo_bad:
+        try:
+            import json
+            with open(settings.argo_data_path, "r") as f:
+                data = json.load(f)
+                if data.get("meta", {}).get("is_synthetic", False):
+                    argo_bad = True
+        except Exception:
+            argo_bad = True
+            
+    return {"model": model_bad, "argo": argo_bad}

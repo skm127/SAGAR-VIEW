@@ -113,7 +113,7 @@ export const HoverSounderHUD: React.FC<HoverSounderHUDProps> = ({
 
       <div className="hover-value-row">
         <div className="hover-val-group">
-          <span className="hover-val-label">{variable === 'thetao' ? 'TEMPERATURE' : 'SALINITY'} ({depth}M)</span>
+          <span className="hover-val-label">{variable === 'thetao' ? 'TEMPERATURE' : 'SALINITY'} ({depth}m DEPTH)</span>
           <span className="hover-val-num">
             {sampledValue} <span className="hover-unit">{unit}</span>
           </span>

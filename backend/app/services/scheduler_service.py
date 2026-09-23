@@ -26,9 +26,9 @@ class SchedulerService:
             return
         self.scheduler.add_job(
             self._run_data_refresh,
-            CronTrigger(hour="0,6,12,18", minute=15),
+            CronTrigger(minute=15),
             id="automated_data_refresh",
-            name="Refresh live model + Argo data every 6 hours",
+            name="Refresh live model + Argo data hourly",
             replace_existing=True,
             misfire_grace_time=3600,
             max_instances=1,
@@ -36,7 +36,7 @@ class SchedulerService:
         )
         self.scheduler.start()
         self._is_running = True
-        logger.info("SchedulerService started: live refresh at 00:15, 06:15, 12:15, 18:15 UTC.")
+        logger.info("SchedulerService started: live refresh hourly at minute 15.")
 
     def shutdown(self):
         if self._is_running:
