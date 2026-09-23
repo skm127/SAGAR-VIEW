@@ -390,7 +390,7 @@ export const RegionAnalysisModal: React.FC<RegionAnalysisModalProps> = ({
                         <div className="hist-bar-track">
                           <div
                             className="hist-bar-fill"
-                            style={{ height: `${Math.max(4, bin.percentage * 2.2)}px` }}
+                            style={{ height: `${Math.max(4, bin.percentage)}%` }}
                           />
                         </div>
                         <span className="hist-pct">{bin.percentage}%</span>

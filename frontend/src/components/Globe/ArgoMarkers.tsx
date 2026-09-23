@@ -240,7 +240,13 @@ function MooredBuoy3DMarker({
   const [hovered, setHovered] = useState(false);
   const ringRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
-  const pos = latLonToVector3(buoy.lat, buoy.lon, GLOBE_RADIUS + 0.02);
+  const pos = useMemo(() => latLonToVector3(buoy.lat, buoy.lon, GLOBE_RADIUS + 0.02), [buoy.lat, buoy.lon]);
+  
+  const quaternion = useMemo(() => {
+    const q = new THREE.Quaternion();
+    q.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
+    return q;
+  }, [pos]);
 
   useFrame(({ clock }) => {
     if (ringRef.current) {
@@ -263,12 +269,10 @@ function MooredBuoy3DMarker({
     }
   });
 
-  const labelOffset = useMemo(() => {
-    return pos.clone().normalize().multiplyScalar(0.06);
-  }, [pos]);
+  const labelOffset = useMemo(() => new THREE.Vector3(0, 0.08, 0), []);
 
   return (
-    <group position={pos}>
+    <group position={pos} quaternion={quaternion}>
       {/* Outer glow halo */}
       <mesh ref={glowRef}>
         <sphereGeometry args={[0.045, 16, 16]} />
@@ -282,19 +286,22 @@ function MooredBuoy3DMarker({
       </mesh>
 
       {/* Mooring radar ping ring */}
-      <mesh ref={ringRef} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.02, 0.026, 24]} />
+      <mesh ref={ringRef} position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.02, 0.03, 32]} />
         <meshBasicMaterial
           color={buoy.warning ? '#ff9800' : '#ffc107'}
           transparent
-          opacity={0.6}
+          opacity={0.0}
           side={THREE.DoubleSide}
+          depthWrite={false}
         />
       </mesh>
 
       {/* Sleek Diamond buoy body instead of cartoon cup */}
       <mesh
-        rotation={[0, 0, 0]}
+        castShadow
+        receiveShadow
+        position={[0, 0.03, 0]}
         onClick={(e) => {
           e.stopPropagation();
           onSelect(buoy.id);
@@ -309,7 +316,7 @@ function MooredBuoy3DMarker({
           document.body.style.cursor = 'default';
         }}
       >
-        <octahedronGeometry args={[0.015, 0]} />
+        <cylinderGeometry args={[0.02, 0.02, 0.05, 16]} />
         <meshStandardMaterial
           color={isSelected ? '#ffffff' : buoy.warning ? '#f97316' : '#facc15'}
           emissive={buoy.warning ? '#ea580c' : '#ca8a04'}
@@ -319,11 +326,43 @@ function MooredBuoy3DMarker({
         />
       </mesh>
 
-      {/* Floating label on hover */}
+      {/* Invisible Larger Hit Target for Effortless Clicking */}
+      <mesh
+        position={[0, 0.03, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(buoy.id);
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = 'default';
+        }}
+      >
+        <sphereGeometry args={[0.06, 12, 12]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
+      
+      {/* Subsurface glow / mooring line hint */}
+      <mesh position={[0, -0.025, 0]}>
+        <cylinderGeometry args={[0.005, 0.01, 0.05, 12]} />
+        <meshBasicMaterial
+          color={buoy.warning ? '#fde68a' : '#fcd34d'}
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Floating Platform ID Label (shown on hover) */}
       {(hovered || isSelected) && (
         <Text
           position={labelOffset}
-          fontSize={0.022}
+          fontSize={0.028}
           color={buoy.warning ? '#fde68a' : '#fcd34d'}
           anchorX="center"
           anchorY="bottom"
@@ -348,7 +387,14 @@ function Glider3DMarker({
   onSelect: (id: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const gliderPos = latLonToVector3(glider.lat, glider.lon, GLOBE_RADIUS + 0.02);
+  const pos = useMemo(() => latLonToVector3(glider.lat, glider.lon, GLOBE_RADIUS + 0.02), [glider.lat, glider.lon]);
+  
+  const quaternion = useMemo(() => {
+    const q = new THREE.Quaternion();
+    q.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
+    return q;
+  }, [pos]);
+
   const pulseRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
 
@@ -370,12 +416,10 @@ function Glider3DMarker({
     }
   });
 
-  const labelOffset = useMemo(() => {
-    return gliderPos.clone().normalize().multiplyScalar(0.06);
-  }, [gliderPos]);
+  const labelOffset = useMemo(() => new THREE.Vector3(0, 0.08, 0), []);
 
   return (
-    <group position={gliderPos}>
+    <group position={pos} quaternion={quaternion}>
       {/* Outer glow halo */}
       <mesh ref={glowRef}>
         <sphereGeometry args={[0.045, 16, 16]} />
@@ -390,6 +434,9 @@ function Glider3DMarker({
 
       <mesh
         ref={pulseRef}
+        castShadow
+        receiveShadow
+        position={[0, 0.03, 0]}
         onClick={(e) => {
           e.stopPropagation();
           onSelect(glider.id);
@@ -404,7 +451,7 @@ function Glider3DMarker({
           document.body.style.cursor = 'default';
         }}
       >
-        <octahedronGeometry args={[0.02, 0]} />
+        <octahedronGeometry args={[0.025, 0]} />
         <meshStandardMaterial
           color={isSelected ? '#ffffff' : '#34d399'}
           emissive="#059669"
@@ -412,12 +459,33 @@ function Glider3DMarker({
           roughness={0.2}
         />
       </mesh>
+      
+      {/* Invisible Larger Hit Target for Effortless Clicking */}
+      <mesh
+        position={[0, 0.03, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(glider.id);
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = 'default';
+        }}
+      >
+        <sphereGeometry args={[0.06, 12, 12]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
 
       {/* Floating label on hover */}
       {(hovered || isSelected) && (
         <Text
           position={labelOffset}
-          fontSize={0.022}
+          fontSize={0.028}
           color="#6ee7b7"
           anchorX="center"
           anchorY="bottom"

@@ -959,7 +959,8 @@ function App() {
               lat: s.latitude,
               lon: s.longitude,
               name: s.platform_id,
-              kind: (s.type === 'glider' ? 'glider' : 'buoy') as 'buoy' | 'glider',
+              kind: ((s as any).platform_type === 'glider' || s.type === 'glider' ? 'glider' : 'buoy') as 'buoy' | 'glider',
+              warning: platformStatusMap[s.platform_id] === 'WARNING' || platformStatusMap[s.platform_id] === 'CRITICAL_ANOMALY'
             }))
           }
           platformStatus={platformStatusMap}

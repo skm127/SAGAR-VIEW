@@ -33,7 +33,7 @@ interface GlobeProps {
   showCurrents?: boolean;
   argoProfiles?: ArgoProfileSummary[];
   /** Platform markers beyond Argo floats: id, coordinates and display name. */
-  extraPlatforms?: { id: string; platform_id: string; lat: number; lon: number; name: string; kind: 'buoy' | 'glider' }[];
+  extraPlatforms?: { id: string; platform_id: string; lat: number; lon: number; name: string; kind: 'buoy' | 'glider'; warning?: boolean }[];
   /** platform_id -> anomaly status from the fleet-wide analysis; drives marker colors. */
   platformStatus?: Record<string, string>;
   selectedArgoId?: string | null;
