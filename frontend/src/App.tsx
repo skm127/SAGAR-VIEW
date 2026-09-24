@@ -1407,8 +1407,8 @@ function App() {
 
         {/* Error notification banner */}
         {error && (
-          <div className="error-overlay">
-            <span>⚠ {error}</span>
+          <div className="error-overlay" style={{ backgroundColor: (error.includes('503') || error.includes('not loaded')) ? 'rgba(2, 132, 199, 0.9)' : undefined }}>
+            <span>{(error.includes('503') || error.includes('not loaded')) ? '⏳ Downloading live satellite & sensor data (takes 1-2 mins)...' : `⚠️ ${error}`}</span>
           </div>
         )}
       </main>
