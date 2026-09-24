@@ -161,7 +161,7 @@ All numbers below come from the running system on live/real data (22 Sep 2026 ru
 
 | Environment | Access Link | Description |
 | :--- | :--- | :--- |
-| **Public Live URL** | **[https://riddance-majestic-backtalk.ngrok-free.dev](https://riddance-majestic-backtalk.ngrok-free.dev)** | Public HTTPS URL accessible from any computer, phone, or tablet |
+| **Public Live URL** | **[https://sagar-view.antideploy.com/](https://sagar-view.antideploy.com/)** | Public HTTPS URL accessible from any computer, phone, or tablet |
 | **Local Web Application** | **[http://localhost:5173/](http://localhost:5173/)** | Local Vite development client (fast 60 FPS rendering) |
 | **Local Wi-Fi Network** | **`http://<YOUR-LOCAL-IP>:5173/`** | Testing on mobile devices or laptops connected to same Wi-Fi |
 | **FastAPI Interactive Docs** | **[http://localhost:8000/docs](http://localhost:8000/docs)** | Complete Swagger UI for testing all 12 REST API endpoints |
