@@ -71,15 +71,22 @@ export default function ComparisonPanel({
     const fetchAll = () => {
       setLoading(true);
       setError(null);
+      
+      // Fetch profile data first so we always have metadata
+      getArgoProfile(profileId)
+        .then((profData) => {
+          if (cancelled) return;
+          setProfile(profData);
+        })
+        .catch((err) => console.warn('Failed to load profile metadata:', err));
+
       Promise.all([
         compareProfile(profileId, variable, timeIndex, threshold),
-        getArgoProfile(profileId),
         detectAnomaly(profileId, variable, threshold, timeIndex).catch(() => null),
       ])
-        .then(([compData, profData, anomData]) => {
+        .then(([compData, anomData]) => {
           if (cancelled) return;
           setComparison(compData);
-          setProfile(profData);
           setAnomalyAnalysis(anomData);
         })
         .catch((err) => {

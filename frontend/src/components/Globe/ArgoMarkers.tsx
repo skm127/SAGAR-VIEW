@@ -7,7 +7,7 @@
  */
 import { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Text, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { latLonToVector3, GLOBE_RADIUS } from '../../utils/coordinates';
 import type { ArgoProfileSummary } from '../../types';
@@ -185,18 +185,19 @@ function SingleBuoy({
 
       {/* Floating Platform ID Label (billboard facing camera, shown on hover) */}
       {(hovered || isSelected) && (
-        <Text
-          position={labelOffset}
-          fontSize={0.025}
-          color={isCritical ? '#fca5a5' : isWarning ? '#fde68a' : '#6ee7b7'}
-          anchorX="center"
-          anchorY="bottom"
-          outlineWidth={0.003}
-          outlineColor="#000000"
-          font={undefined}
-        >
-          {profile.platform_id}
-        </Text>
+        <Billboard position={labelOffset}>
+          <Text
+            fontSize={0.025}
+            color={isCritical ? '#fca5a5' : isWarning ? '#fde68a' : '#6ee7b7'}
+            anchorX="center"
+            anchorY="bottom"
+            outlineWidth={0.003}
+            outlineColor="#000000"
+            font={undefined}
+          >
+            {profile.platform_id}
+          </Text>
+        </Billboard>
       )}
 
       {/* Mathematically Honest Subsurface Thermal Plume (Proportional to Delta) */}
@@ -360,18 +361,19 @@ function MooredBuoy3DMarker({
 
       {/* Floating Platform ID Label (shown on hover) */}
       {(hovered || isSelected) && (
-        <Text
-          position={labelOffset}
-          fontSize={0.028}
-          color={buoy.warning ? '#fde68a' : '#fcd34d'}
-          anchorX="center"
-          anchorY="bottom"
-          outlineWidth={0.003}
-          outlineColor="#000000"
-          font={undefined}
-        >
-          {buoy.platform_id}
-        </Text>
+        <Billboard position={labelOffset}>
+          <Text
+            fontSize={0.028}
+            color={buoy.warning ? '#fde68a' : '#fcd34d'}
+            anchorX="center"
+            anchorY="bottom"
+            outlineWidth={0.003}
+            outlineColor="#000000"
+            font={undefined}
+          >
+            {buoy.platform_id}
+          </Text>
+        </Billboard>
       )}
     </group>
   );
@@ -483,18 +485,19 @@ function Glider3DMarker({
 
       {/* Floating label on hover */}
       {(hovered || isSelected) && (
-        <Text
-          position={labelOffset}
-          fontSize={0.028}
-          color="#6ee7b7"
-          anchorX="center"
-          anchorY="bottom"
-          outlineWidth={0.003}
-          outlineColor="#000000"
-          font={undefined}
-        >
-          {glider.name || glider.platform_id}
-        </Text>
+        <Billboard position={labelOffset}>
+          <Text
+            fontSize={0.028}
+            color="#6ee7b7"
+            anchorX="center"
+            anchorY="bottom"
+            outlineWidth={0.003}
+            outlineColor="#000000"
+            font={undefined}
+          >
+            {glider.name || glider.platform_id}
+          </Text>
+        </Billboard>
       )}
     </group>
   );

@@ -26,7 +26,7 @@ from app.services.cache_service import CacheService
 from app.services.realtime_service import RealtimeOceanService
 from app.services.guide_service import GuideService
 from app.services.cyclone_service import CycloneService
-from app.routers import model_data, observations, comparison, anomaly, analytics, realtime, guide, intelligence, ogc
+from app.routers import model_data, observations, comparison, anomaly, analytics, realtime, guide, intelligence, ogc, mobile
 from app.models import schemas
 
 
@@ -197,6 +197,7 @@ app.include_router(realtime.router)
 app.include_router(guide.router)
 app.include_router(intelligence.router)
 app.include_router(ogc.router)
+app.include_router(mobile.router)
 
 
 @app.get("/api/v1/analytics/heat-potential", response_model=schemas.HeatPotentialResponse, tags=["Analytics & Spatial Intelligence"])

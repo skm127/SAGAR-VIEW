@@ -26,6 +26,8 @@
 10. [Engineering Challenges & War Stories ("How We Built It")](#10-engineering-challenges--war-stories-how-we-built-it)
 11. [Troubleshooting & FAQ](#11-troubleshooting--faq)
 12. [Project Structure & Technology Stack](#12-project-structure--technology-stack)
+13. [Citation & Acknowledgments](#13-citation--acknowledgments)
+14. [SAGAR-VIEW Mobile — Field Companion](#14-sagar-view-mobile--field-companion)
 
 ---
 
@@ -503,3 +505,23 @@ SAGAR-VIEW/
 * **International Argo Program** and the national data assembly centres.
 * **Copernicus Marine Environment Monitoring Service (CMEMS)** for numerical physics references.
 * Built for **Smart India Hackathon (SIH 2026)** — Problem Statement `SIH26067`.
+
+## 14. SAGAR-VIEW Mobile — Field Companion
+
+A lightweight **Progressive Web App (PWA) + Capacitor** mobile companion for field researchers and marine observers.
+
+| Platform | How to Install |
+| :--- | :--- |
+| **Android APK** | Download from [GitHub Releases](https://github.com/skm127/SAGAR-VIEW/releases) |
+| **iOS / Safari** | Open the live URL in Safari → Share → **Add to Home Screen** |
+| **Any Browser** | Navigate to the live URL → browser will prompt PWA install |
+
+**Key Mobile Features:**
+- 🌊 Real-time ocean snapshot dashboard with SST, salinity & current speed
+- 📍 GPS-aware nearest Argo profile lookup
+- 📶 Offline queue — observations sync when connectivity returns
+- 🗺️ Mini 3D globe with live vessel/float tracking
+- 📊 Vertical profile viewer with pull-to-refresh
+
+See [`mobile/`](mobile/) for source code and [`mobile/capacitor.config.ts`](mobile/capacitor.config.ts) for native build configuration.
+
