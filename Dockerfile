@@ -41,10 +41,10 @@ RUN mkdir -p /app/data/model /app/data/argo \
 # Copy built frontend into a static directory
 COPY --from=frontend-build /build/dist /app/static
 
-# Non-root user
-RUN addgroup --system oceanx && adduser --system --ingroup oceanx oceanx \
-    && chown -R oceanx:oceanx /app/data /app/static
-ENV HOME=/app
+# Non-root user with a writable home for gunicorn temp files
+RUN addgroup --system oceanx && adduser --system --ingroup oceanx --home /home/oceanx oceanx \
+    && chown -R oceanx:oceanx /app/data /app/static /home/oceanx
+ENV HOME=/home/oceanx
 USER oceanx
 
 EXPOSE 8000
