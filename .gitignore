@@ -45,3 +45,7 @@ prd_full.txt
 .vercel/
 .freebuff/
 backend/data/
+
+# Mobile app (separate project, not for web deployment)
+mobile/
+
