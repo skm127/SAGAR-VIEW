@@ -18,7 +18,7 @@ def _build_sqlite_url():
 def _create_engine():
     """Create the SQLAlchemy engine, falling back to SQLite if the configured
     database driver (e.g. psycopg for PostgreSQL) is not installed."""
-    url = settings.database_url if settings.database_url else _build_sqlite_url()
+    url = settings.effective_database_url if settings.effective_database_url else _build_sqlite_url()
     connect_args = {"check_same_thread": False} if url.startswith("sqlite") else {}
 
     try:

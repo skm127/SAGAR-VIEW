@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     database_url: str | None = None
     redis_url: str | None = None
+
+    @property
+    def effective_database_url(self) -> str | None:
+        """Return None for empty strings so SQLite fallback kicks in."""
+        return self.database_url if self.database_url else None
     copernicus_username: str | None = None
     copernicus_password: str | None = None
     argo_erddap_url: str = "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats"

@@ -14,10 +14,28 @@ RUN npm run build
 
 FROM python:3.11-slim
 
+# ── Production environment defaults ──────────────────────────────
+# These ensure the app works out-of-the-box on any cloud platform
+# without needing to manually set env vars.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    DATA_DIR=/app/data
+    DATA_DIR=/app/data \
+    CORS_ORIGINS=* \
+    ALLOW_SYNTHETIC_DATA=false \
+    DEBUG=false \
+    ARGO_ERDDAP_URL=https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats \
+    ARGO_DAYS_BACK=21 \
+    MODEL_DAYS_BACK=4 \
+    MODEL_DAYS_FORWARD=2 \
+    DATA_REFRESH_INTERVAL_HOURS=6 \
+    STARTUP_REFRESH_MAX_AGE_HOURS=12
+
+# ── Unset vars that cloud platforms may auto-inject ──────────────
+# Antideploy/Fly.io sometimes injects DATABASE_URL pointing to
+# PostgreSQL, but we only need SQLite. Unsetting prevents crashes.
+ENV DATABASE_URL="" \
+    REDIS_URL=""
 
 WORKDIR /app
 
@@ -49,7 +67,6 @@ USER oceanx
 
 EXPOSE 8000
 
-# One async Uvicorn worker: each worker would otherwise run its own startup
-# ingestion and 6-hourly scheduler and hold its own copy of the model in memory.
-# Guard: if PORT is a privileged port (<1024), non-root can't bind → force 8000.
-CMD ["sh", "-c", "P=${PORT:-8000}; [ \"$P\" -lt 1024 ] 2>/dev/null && P=8000; exec gunicorn app.main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$P --timeout 180"]
+# Always bind to port 8000 — ignore any PORT env var that could
+# be set to a privileged port by the cloud platform.
+CMD ["gunicorn", "app.main:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--timeout", "180"]
