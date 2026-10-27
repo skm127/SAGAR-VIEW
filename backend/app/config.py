@@ -39,6 +39,14 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Prevent PermissionError: if inside Docker container (/app/data exists), force /app/data
+        if os.path.isdir("/app/data"):
+            self.data_dir = "/app/data"
+        elif self.data_dir.startswith(".."):
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            candidate = os.path.join(base_dir, "data")
+            if os.path.isdir(candidate):
+                self.data_dir = candidate
         if not self.model_data_path:
             self.model_data_path = os.path.join(self.data_dir, "model", "live_ocean_model.nc")
         if not self.argo_data_path:

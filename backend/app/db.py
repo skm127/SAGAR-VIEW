@@ -10,25 +10,33 @@ settings = get_settings()
 
 def _build_sqlite_url():
     """Build a local SQLite URL as fallback."""
-    os.makedirs(settings.data_dir, exist_ok=True)
-    sqlite_path = os.path.abspath(os.path.join(settings.data_dir, "oceanx_history.db"))
+    data_dir = settings.data_dir
+    if not os.path.isabs(data_dir) and os.path.isdir("/app/data"):
+        data_dir = "/app/data"
+    try:
+        os.makedirs(data_dir, exist_ok=True)
+        sqlite_path = os.path.abspath(os.path.join(data_dir, "oceanx_history.db"))
+    except Exception:
+        sqlite_path = os.path.abspath("oceanx_history.db")
     return f"sqlite:///{sqlite_path}"
 
 
 def _create_engine():
     """Create the SQLAlchemy engine, falling back to SQLite if the configured
-    database driver (e.g. psycopg for PostgreSQL) is not installed."""
+    database driver (e.g. psycopg for PostgreSQL) is not installed or connection fails."""
     url = settings.effective_database_url if settings.effective_database_url else _build_sqlite_url()
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
     connect_args = {"check_same_thread": False} if url.startswith("sqlite") else {}
 
     try:
         eng = create_engine(url, connect_args=connect_args)
-        # Force a real connection attempt so missing drivers surface now
+        # Force a real connection attempt so missing drivers or unreachable hosts surface now
         eng.connect().close()
         logger.info(f"Database connected: {url.split('@')[-1] if '@' in url else url}")
         return eng
     except Exception as exc:
-        if settings.database_url:
+        if settings.effective_database_url:
             logger.warning(
                 f"Cannot connect to configured DATABASE_URL ({exc}); "
                 "falling back to local SQLite."

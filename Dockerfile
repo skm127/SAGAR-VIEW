@@ -67,6 +67,6 @@ USER oceanx
 
 EXPOSE 8000
 
-# Always bind to port 8000 — ignore any PORT env var that could
-# be set to a privileged port by the cloud platform.
-CMD ["gunicorn", "app.main:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--timeout", "180"]
+# Bind to PORT if provided by the platform (e.g. Fly.io/Antideploy), defaulting to 8000.
+# Guard against privileged ports (<1024) which non-root users cannot bind to.
+CMD ["sh", "-c", "P=${PORT:-8000}; [ \"$P\" -lt 1024 ] 2>/dev/null && P=8000; exec gunicorn app.main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$P --timeout 180"]
