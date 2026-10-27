@@ -51,4 +51,5 @@ EXPOSE 8000
 
 # One async Uvicorn worker: each worker would otherwise run its own startup
 # ingestion and 6-hourly scheduler and hold its own copy of the model in memory.
-CMD ["sh", "-c", "gunicorn app.main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8000} --timeout 180"]
+# Guard: if PORT is a privileged port (<1024), non-root can't bind → force 8000.
+CMD ["sh", "-c", "P=${PORT:-8000}; [ \"$P\" -lt 1024 ] 2>/dev/null && P=8000; exec gunicorn app.main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$P --timeout 180"]
