@@ -1,6 +1,6 @@
 """
 guide_service.py
-AI-Powered Ocean Science Guide using Google Gemini.
+Ocean Science Guide Knowledge Engine.
 
 Provides contextual, layman-friendly explanations of ocean data,
 cyclone science, INCOIS operations, and the OCEAN-X platform.
@@ -12,7 +12,7 @@ from typing import Optional
 
 logger = logging.getLogger("oceanx")
 
-OCEAN_GUIDE_SYSTEM_PROMPT = """You are SAGAR AI — the official intelligent assistant for the OCEAN-X (SAGAR-VIEW) platform, built for INCOIS under India's Ministry of Earth Sciences (SIH 2026, Problem Statement PS26067).
+OCEAN_GUIDE_SYSTEM_PROMPT = """You are SAGAR Guide — the official scientific guide for the OCEAN-X (SAGAR-VIEW) platform, built for INCOIS under India's Ministry of Earth Sciences (SIH 2026, Problem Statement PS26067).
 
 YOUR ROLE:
 You are a friendly, expert ocean science guide who explains everything in SIMPLE, EVERYDAY LANGUAGE that a 15-year-old student or a coastal fisherman could understand. You translate complex oceanography into memorable analogies and plain English.
@@ -58,7 +58,7 @@ CONVERSATION RULES:
 9. Never invent numbers. Only quote values that appear in the CURRENT CONTEXT or in this prompt; otherwise tell the user where on screen to find them.
 
 PLATFORM KEYBOARD SHORTCUTS:
-- Press G to open/close this AI Guide
+- Press G to open/close this Ocean Guide
 - Press D to open Live Real-Time Ocean Data with 72-hour predictions
 - Press 1-5 for quick basin navigation
 - Press C to toggle ocean current streamlines
@@ -71,7 +71,7 @@ PLATFORM KEYBOARD SHORTCUTS:
 
 
 class GuideService:
-    """AI-powered ocean science chatbot using Google Gemini."""
+    """Ocean science knowledge guide service."""
 
     def __init__(self):
         self.model = None
@@ -83,7 +83,7 @@ class GuideService:
             return
 
         if not self.api_key:
-            logger.warning("No GEMINI_API_KEY or GOOGLE_API_KEY found. AI Guide will use enhanced fallback mode.")
+            logger.warning("No GEMINI_API_KEY or GOOGLE_API_KEY found. Ocean Guide will use offline knowledge mode.")
             self._initialized = True
             return
 
@@ -96,7 +96,7 @@ class GuideService:
                 model_name="gemini-flash-latest",
                 system_instruction=OCEAN_GUIDE_SYSTEM_PROMPT,
             )
-            logger.info("Gemini AI Guide initialized (%s)", self.model.model_name)
+            logger.info("Ocean Guide service initialized (%s)", self.model.model_name)
             self._initialized = True
         except Exception as e:
             logger.error(f"Failed to initialize Gemini: {e}")
@@ -291,7 +291,7 @@ class GuideService:
                 "- **1-5** — Jump to different ocean basins\n"
                 "- **T** — Vertical cross-section tool\n"
                 "- **B** — Scientific mission briefing\n"
-                "- **G** — Toggle this AI Guide\n\n"
+                "- **G** — Toggle this Ocean Guide\n\n"
                 "**Bottom Bar:** Depth slider to dive underwater, time slider to see ocean changes over time!"
             )
 

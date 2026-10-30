@@ -1,5 +1,5 @@
 """
-guide.py — AI Guide chatbot API router.
+guide.py — Ocean Guide API router.
 Provides /api/guide/chat endpoint for the OceanGuideAgent frontend.
 """
 
@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from app.limiter import limiter
 
-router = APIRouter(prefix="/api/guide", tags=["AI Guide"])
+router = APIRouter(prefix="/api/guide", tags=["Ocean Guide"])
 
 
 class ChatMessageInput(BaseModel):

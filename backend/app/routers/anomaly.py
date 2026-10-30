@@ -6,7 +6,7 @@ from fastapi import APIRouter, Request, HTTPException, Query
 from typing import Optional
 import numpy as np
 
-from ..models.schemas import AnomalyFleetSummary, AnomalyAnalysisResponse
+from app.models.schemas import AnomalyFleetSummary, AnomalyAnalysisResponse
 
 router = APIRouter(prefix="/api/anomaly", tags=["Anomaly Intelligence"])
 
@@ -69,12 +69,33 @@ def detect_profile_anomaly(
     if not obs_vals:
         raise HTTPException(status_code=400, detail=f"Variable {variable} not available in profile")
 
+    # Determine model time co-location
+    best_time_index = time_index
+    time_offset_hours = None
+    model_timestamp = None
+    try:
+        tname = nc_service._find_coord("time", "t")
+        if tname and tname in nc_service.dataset:
+            import pandas as pd
+            times = pd.DatetimeIndex(nc_service.dataset[tname].values)
+            if len(times) > 0 and profile.get("timestamp"):
+                t_obs = pd.Timestamp(profile["timestamp"]).tz_localize(None) if pd.Timestamp(profile["timestamp"]).tzinfo is None \
+                    else pd.Timestamp(profile["timestamp"]).tz_convert(None)
+                offsets = np.abs((times - t_obs).total_seconds().values) / 3600.0
+                closest_idx = int(np.argmin(offsets))
+                if time_index == 0:
+                    best_time_index = closest_idx
+                time_offset_hours = float(offsets[best_time_index])
+                model_timestamp = str(times[best_time_index])
+    except Exception:
+        pass
+
     try:
         m_depths, m_vals = nc_service.get_depth_profile(
             variable=variable,
             lat=profile["latitude"],
             lon=profile["longitude"],
-            time_index=time_index,
+            time_index=best_time_index,
         )
         # Filter masked/NaN model values BEFORE interpolation — NaN model values
         # must never be treated as real deltas by the Isolation Forest features.
@@ -92,6 +113,9 @@ def detect_profile_anomaly(
             model_vals=m_interp,
             variable=variable,
             anomaly_threshold=threshold,
+            time_offset_hours=time_offset_hours,
+            obs_timestamp=profile.get("timestamp"),
+            model_timestamp=model_timestamp,
         )
         if cache_service:
             cache_service.set(cache_key, result, ttl_seconds=300)

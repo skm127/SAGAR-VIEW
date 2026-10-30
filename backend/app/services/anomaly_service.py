@@ -70,23 +70,20 @@ class AnomalyService:
         n_samples = 300
 
         # Normal oceanographic background baseline:
-        # mean_delta: 0.05 to 0.45 °C
-        # max_delta: 0.10 to 0.75 °C
-        # upper_200m_heat_delta: -0.25 to +0.25 °C
-        # thermocline_gradient_diff: 0.002 to 0.020 °C/m
-        # max_layer_depth: 10 to 120 meters
-        mean_delta = rng.gamma(shape=2.0, scale=0.12, size=n_samples)
-        max_delta = mean_delta * rng.uniform(1.2, 2.2, size=n_samples)
-        heat_delta = rng.normal(loc=0.0, scale=0.18, size=n_samples)
-        grad_diff = rng.gamma(shape=1.8, scale=0.008, size=n_samples)
-        max_depth = rng.uniform(10.0, 150.0, size=n_samples)
+        # Operational ocean numerical models (HYCOM/CMEMS) typically differ from point float profiles
+        # by 0.6 to 1.6 °C at the thermocline due to vertical grid discretization and sub-mesoscale physics.
+        mean_delta = rng.gamma(shape=2.5, scale=0.35, size=n_samples)
+        max_delta = mean_delta * rng.uniform(1.3, 2.2, size=n_samples)
+        heat_delta = rng.normal(loc=0.0, scale=0.45, size=n_samples)
+        grad_diff = rng.gamma(shape=2.0, scale=0.015, size=n_samples)
+        max_depth = rng.uniform(20.0, 160.0, size=n_samples)
 
-        # Inject 10% realistic synthetic anomaly vectors (e.g. deep heatwave blobs)
-        n_anom = int(n_samples * 0.10)
-        mean_delta[:n_anom] += rng.uniform(1.0, 2.5, size=n_anom)
-        max_delta[:n_anom] += rng.uniform(2.0, 4.2, size=n_anom)
-        heat_delta[:n_anom] += rng.uniform(1.2, 3.0, size=n_anom)
-        grad_diff[:n_anom] += rng.uniform(0.025, 0.065, size=n_anom)
+        # Inject 8% realistic extreme anomaly vectors (e.g. deep heatwave blobs or intense eddy cores)
+        n_anom = int(n_samples * 0.08)
+        mean_delta[:n_anom] += rng.uniform(1.8, 3.5, size=n_anom)
+        max_delta[:n_anom] += rng.uniform(3.5, 6.0, size=n_anom)
+        heat_delta[:n_anom] += rng.uniform(1.5, 3.8, size=n_anom)
+        grad_diff[:n_anom] += rng.uniform(0.04, 0.09, size=n_anom)
         max_depth[:n_anom] = rng.uniform(60.0, 180.0, size=n_anom)
 
         X_baseline = np.column_stack([
@@ -118,6 +115,7 @@ class AnomalyService:
             return {
                 "mean_delta": None,
                 "max_delta": None,
+                "signed_max_delta": None,
                 "upper_200m_heat_delta": None,
                 "thermocline_gradient_diff": None,
                 "max_layer_depth": None,
@@ -139,6 +137,7 @@ class AnomalyService:
 
         max_idx = int(np.argmax(abs_delta))
         max_delta = float(abs_delta[max_idx])
+        signed_max_delta = float(delta[max_idx])
         max_layer_depth = float(d[max_idx])
 
         upper_mask = d <= 200
@@ -157,6 +156,7 @@ class AnomalyService:
         return {
             "mean_delta": round(mean_delta, 4),
             "max_delta": round(max_delta, 4),
+            "signed_max_delta": round(signed_max_delta, 4),
             "upper_200m_heat_delta": round(upper_heat_delta, 4) if upper_heat_delta is not None else None,
             "thermocline_gradient_diff": round(thermocline_gradient_diff, 4) if thermocline_gradient_diff is not None else None,
             "max_layer_depth": round(max_layer_depth, 1),
@@ -169,7 +169,10 @@ class AnomalyService:
         obs_vals: List[float],
         model_vals: List[float],
         variable: str = "thetao",
-        anomaly_threshold: float = 1.0
+        anomaly_threshold: float = 1.0,
+        time_offset_hours: Optional[float] = None,
+        obs_timestamp: Optional[str] = None,
+        model_timestamp: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Perform authentic Isolation Forest ML and physical analysis on a single float profile."""
         self._ensure_model_trained()
@@ -202,71 +205,111 @@ class AnomalyService:
 
         # Feature vector for Isolation Forest
         feature_vector = np.array([[
-            features["mean_delta"],
-            features["max_delta"],
-            features["upper_200m_heat_delta"],
-            features["thermocline_gradient_diff"],
-            features["max_layer_depth"]
+            features["mean_delta"] or 0.0,
+            features["max_delta"] or 0.0,
+            features["upper_200m_heat_delta"] or 0.0,
+            features["thermocline_gradient_diff"] or 0.0,
+            features["max_layer_depth"] or 0.0
         ]], dtype=np.float64)
 
         # Evaluate Isolation Forest decision score
-        # decision_function outputs negative values for anomalies, positive for inliers
         raw_decision = float(self._model.decision_function(feature_vector)[0])
         is_forest_outlier = bool(self._model.predict(feature_vector)[0] == -1)
 
         # Scale decision function to normalized continuous anomaly score [0.0, 1.0]
-        # In scikit-learn, decision_function typically ranges from -0.35 (extreme anomaly) to +0.25 (typical inlier)
-        # Shift and scale with logistic sigmoid:
-        iso_score = 1.0 / (1.0 + np.exp(12.0 * (raw_decision + 0.02)))
+        iso_score = 1.0 / (1.0 + np.exp(10.0 * (raw_decision + 0.04)))
 
-        # Physical heat penalty
-        physical_heat_factor = min(1.0, max(0.0, (features["max_delta"] - 0.5) / 2.5))
+        # Physical heat factor (calibrated for genuine multi-degree shifts)
+        physical_heat_factor = min(1.0, max(0.0, (features["max_delta"] - 1.0) / 3.0))
 
         # Composite score blending Isolation Forest decision boundary with physical layer delta
-        composite_score = round(float(0.65 * iso_score + 0.35 * physical_heat_factor), 3)
+        composite_score = round(float(0.60 * iso_score + 0.40 * physical_heat_factor), 3)
 
-        # Severity classification.
-        # We require physical corroboration (strong composite score AND a significant max temperature delta). 
-        # A simple count of anomalous_depths fails because Argo floats sample every 1-2 meters, meaning
-        # a minor 15m thick thermocline mismatch generates 10+ anomalies, falsely triggering CRITICAL.
-        # A fixed |ΔT| ≥ 1 °C rule would fire on most profiles because the
-        # model's own thermocline RMSE is ~1–1.5 °C; so a profile must be an
-        # Isolation Forest outlier relative to the fleet's residual distribution.
-        if is_forest_outlier and composite_score >= 0.75:
-            status = "CRITICAL_ANOMALY"
-            severity = "HIGH"
-        elif is_forest_outlier or composite_score >= 0.6:
-            status = "WARNING"
-            severity = "MEDIUM"
-        else:
+        signed_delta = features.get("signed_max_delta")
+        if signed_delta is None:
+            signed_delta = features["max_delta"]
+        upper_heat = features.get("upper_200m_heat_delta") or 0.0
+
+        advisories = []
+
+        # GATE 1: Temporal offset check.
+        # If float and model are separated by > 48 hours (e.g. October observation vs September model),
+        # this represents a seasonal/climatological baseline comparison, NOT an active real-time heatwave.
+        if time_offset_hours is not None and time_offset_hours > 48.0:
+            offset_days = round(time_offset_hours / 24.0, 1)
+            obs_date = obs_timestamp[:10] if obs_timestamp else "Observation"
+            model_date = model_timestamp[:10] if model_timestamp else "Model baseline"
             status = "NOMINAL"
             severity = "LOW"
-
-        # Oceanographic root cause hypothesis
-        advisories = []
-        if status == "CRITICAL_ANOMALY":
-            if 80 <= features["max_layer_depth"] <= 250:
-                hypothesis = (
-                    f"Subsurface Marine Heatwave / Downwelling Isopycnal Inversion: "
-                    f"Trapped thermal excess of +{features['max_delta']:.2f}°C detected at {features['max_layer_depth']}m depth. "
-                    f"Thermocline gradient discrepancy of {features['thermocline_gradient_diff']:.4f}°C/m indicates intense mesoscale eddy compression."
-                )
-                advisories.append(f"Cyclone Potential: Subsurface heat pool between {max(0, int(features['max_layer_depth'] - 40))}m–{int(features['max_layer_depth'] + 40)}m prevents cold upwelling, providing fuel for rapid tropical cyclone intensification.")
-                advisories.append(f"INCOIS Action: Assimilate sensor #{profile_id} soundings into the 6-hr cycle to correct the model's mixed-layer physics at {features['max_layer_depth']}m depth.")
-            elif features["max_layer_depth"] < 50:
-                hypothesis = "Intense Upper Mixed Layer Heating: Atmospheric radiative forcing divergence in numerical model."
-                advisories.append(f"Upper Layer Warming: Atmospheric radiative forcing anomaly at {features['max_layer_depth']}m. Monitor for sudden SST spike.")
-                advisories.append(f"INCOIS Action: Cross-reference with INSAT-3D SST retrievals for localized atmospheric marine heatwave confirmation.")
-            else:
-                hypothesis = "Deep Mesoscale Baroclinic Displacement: Internal wave activity or deep eddy core divergence."
-                advisories.append(f"Deep Divergence: Significant internal wave activity or deep eddy core at {features['max_layer_depth']}m.")
-                advisories.append(f"INCOIS Action: Assimilate deep sounding data to correct mesoscale baroclinic structure.")
-        elif status == "WARNING":
-            hypothesis = "Moderate Seasonal Thermocline Displacement: Minor barrier layer salinity or seasonal warming divergence."
-            advisories.append(f"Thermocline Drift: Moderate subsurface displacement detected at {features['max_layer_depth']}m. Automated 24h tracking active.")
+            composite_score = round(float(composite_score), 3)
+            hypothesis = (
+                f"Climatological Reference Alignment: Float sampled on {obs_date}, compared with numerical "
+                f"model baseline from {model_date} (temporal offset: {offset_days} days). "
+                f"Thermocline variance of {features['max_delta']:.2f}°C represents expected seasonal post-monsoon mixed layer transition."
+            )
+            advisories.append(
+                f"Temporal Offset Notice: Sensor telemetry is {offset_days} days offset from the numerical model cycle. "
+                f"Divergence represents normal seasonal evolution, not an active real-time marine heatwave."
+            )
+            advisories.append(
+                "Assimilation Advisory: For real-time 6-hourly ocean state correction, assimilate sensor soundings within ±36h co-location window."
+            )
         else:
-            hypothesis = "Model Reanalysis Concordant with Observations: In-situ sensor values verify within normal experimental tolerances."
-            advisories.append("Validation: In-situ observations match the model within tolerance at this location and time.")
+            # GATE 2: Genuine physical oceanographic anomaly verification (within ±48h)
+            # A true Subsurface Marine Heatwave requires POSITIVE thermal excess (signed_delta > 0)
+            # and sustained upper ocean heat accumulation (upper_heat > 0.7 °C).
+            is_true_heatwave = (
+                is_forest_outlier
+                and composite_score >= 0.85
+                and signed_delta >= 2.2
+                and upper_heat >= 0.70
+            )
+            is_true_upwelling = (
+                is_forest_outlier
+                and composite_score >= 0.85
+                and signed_delta <= -2.5
+                and upper_heat <= -0.70
+            )
+
+            if is_true_heatwave:
+                status = "CRITICAL_ANOMALY"
+                severity = "HIGH"
+                if 80 <= features["max_layer_depth"] <= 250:
+                    hypothesis = (
+                        f"Subsurface Marine Heatwave / Downwelling Isopycnal Inversion: "
+                        f"Trapped thermal excess of +{signed_delta:.2f}°C detected at {features['max_layer_depth']}m depth. "
+                        f"Thermocline gradient discrepancy of {features['thermocline_gradient_diff']:.4f}°C/m indicates intense mesoscale eddy compression."
+                    )
+                    advisories.append(f"Cyclone Potential: Subsurface heat pool between {max(0, int(features['max_layer_depth'] - 40))}m–{int(features['max_layer_depth'] + 40)}m prevents cold upwelling, providing fuel for rapid tropical cyclone intensification.")
+                    advisories.append(f"INCOIS Action: Assimilate sensor #{profile_id} soundings into the 6-hr cycle to correct the model's mixed-layer physics at {features['max_layer_depth']}m depth.")
+                elif features["max_layer_depth"] < 50:
+                    hypothesis = "Intense Upper Mixed Layer Heating: Atmospheric radiative forcing divergence in numerical model."
+                    advisories.append(f"Upper Layer Warming: Atmospheric radiative forcing anomaly at {features['max_layer_depth']}m. Monitor for sudden SST spike.")
+                    advisories.append(f"INCOIS Action: Cross-reference with INSAT-3D SST retrievals for localized atmospheric marine heatwave confirmation.")
+                else:
+                    hypothesis = "Deep Mesoscale Baroclinic Displacement: Internal wave activity or deep eddy core divergence."
+                    advisories.append(f"Deep Divergence: Significant internal wave activity or deep eddy core at {features['max_layer_depth']}m.")
+                    advisories.append(f"INCOIS Action: Assimilate deep sounding data to correct mesoscale baroclinic structure.")
+            elif is_true_upwelling:
+                status = "CRITICAL_ANOMALY"
+                severity = "HIGH"
+                hypothesis = (
+                    f"Intense Cyclonic Eddy Upwelling / Cold Core Divergence: "
+                    f"Subsurface thermal deficit of {signed_delta:.2f}°C detected at {features['max_layer_depth']}m depth. "
+                    f"Strong vertical shoaling of the 20°C isotherm indicating cyclonic eddy suction or wind-driven coastal upwelling."
+                )
+                advisories.append(f"Upwelling Dynamics: Rapid shoaling of thermocline cools upper mixed layer, acting as a natural buffer against cyclone intensification.")
+                advisories.append(f"INCOIS Action: Validate coastal upwelling index against satellite altimetry sea surface height anomaly.")
+            elif (is_forest_outlier and composite_score >= 0.70) or features["max_delta"] >= 2.8:
+                status = "WARNING"
+                severity = "MEDIUM"
+                hypothesis = f"Moderate Seasonal Thermocline Displacement: Discrepancy of {signed_delta:+.2f}°C at {features['max_layer_depth']}m depth. Automated tracking active."
+                advisories.append(f"Thermocline Drift: Moderate subsurface displacement detected at {features['max_layer_depth']}m. Automated 24h tracking active.")
+            else:
+                status = "NOMINAL"
+                severity = "LOW"
+                hypothesis = "Model Reanalysis Concordant with Observations: In-situ sensor values verify within normal operational tolerances."
+                advisories.append("Validation: In-situ observations match the model within tolerance at this location and time.")
 
         result = {
             "profile_id": profile_id,

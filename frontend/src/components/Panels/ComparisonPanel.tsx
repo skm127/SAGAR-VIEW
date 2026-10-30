@@ -142,8 +142,9 @@ export default function ComparisonPanel({
     .join(' ');
 
   const anomalyCount = comparisons.filter((c) => c.anomaly_flag).length;
-  const isCriticalAnomaly = overrideStatus === 'CRITICAL_ANOMALY' || anomalyAnalysis?.status === 'CRITICAL_ANOMALY';
-  const isWarningAnomaly = overrideStatus === 'WARNING' || anomalyAnalysis?.status === 'WARNING';
+  const isCriticalAnomaly = anomalyAnalysis?.status === 'CRITICAL_ANOMALY';
+  const isWarningAnomaly = anomalyAnalysis?.status === 'WARNING';
+  const isCycloneWatch = overrideStatus === 'CYCLONE_PROXIMITY';
 
   // Export handlers
   const exportJSON = () => {
@@ -211,6 +212,12 @@ export default function ComparisonPanel({
               <span className="anomaly-badge nominal">
                 <CheckCircle2 size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
                 MODEL NOMINAL
+              </span>
+            )}
+            {isCycloneWatch && (
+              <span className="anomaly-badge cyclone-watch" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)' }}>
+                <Wind size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
+                CYCLONE WATCH ZONE
               </span>
             )}
           </div>

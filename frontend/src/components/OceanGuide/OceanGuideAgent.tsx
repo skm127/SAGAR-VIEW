@@ -11,7 +11,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Bot,
+  BookOpen,
   AlertTriangle,
   AlertCircle,
   MapPin,
@@ -30,7 +30,6 @@ import {
   Volume2,
   Monitor,
   MessageSquare,
-  BookOpen,
 } from 'lucide-react';
 import type { OceanVariable } from '../../types';
 import { chatWithGuide } from '../../services/api';
@@ -97,7 +96,7 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
     {
       id: 'welcome',
       sender: 'ai',
-      text: "Hi! I'm your SAGAR AI Guide. Ocean science can feel overwhelming with all the numbers and grids. I translate everything you see into simple, everyday language. Ask me anything or click a tour below!",
+      text: "Welcome to SAGAR-VIEW! Ocean science can feel overwhelming with all the numbers and grids. I translate everything you see into simple, everyday language. Ask me anything or click a tour below!",
     },
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -165,7 +164,7 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
       });
     } else if (selectedProfileId) {
       parts.push({
-        Icon: Bot,
+        Icon: Anchor,
         title: `Selected In-Situ Platform #${selectedProfileId.replace(/^argo_|_\d+$/g, '')}`,
         body: `You are inspecting a physical ocean sensor deployed by INCOIS. It records live water temperature and saltiness down to 2,000 meters and transmits its ground-truth findings back to satellites.`,
       });
@@ -382,7 +381,7 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
     },
   ];
 
-  // 3. AI-Powered Conversational Q&A Handler
+  // 3. Conversational Ocean Q&A Handler
   const handleAskQuestion = async (question: string) => {
     if (!question.trim()) return;
 
@@ -438,20 +437,20 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
   const liveParts = getLiveScreenExplanation();
 
   return (
-    <aside className="ocean-guide-container" aria-label="SAGAR AI Ocean Guide Assistant">
+    <aside className="ocean-guide-container" aria-label="SAGAR Ocean Science Guide">
       {/* Floating Trigger Pill (When minimized) */}
       {!isOpen && (
         <button
           className="guide-trigger-pill"
           onClick={onToggle}
-          title="Open AI Ocean Guide — Simple layman explanation of what you are seeing"
+          title="Open Ocean Science Guide — Plain-English explanation of active ocean telemetry"
         >
           <div className="pill-avatar-wrap">
-            <Bot size={18} className="pill-avatar" />
+            <BookOpen size={18} className="pill-avatar" />
             <span className="pill-pulse-ring" />
           </div>
           <div className="pill-text-col">
-            <span className="pill-title">AI OCEAN GUIDE</span>
+            <span className="pill-title">OCEAN SCIENCE GUIDE</span>
             <span className="pill-subtitle">What am I looking at? Click me!</span>
           </div>
           <ChevronUp size={14} className="pill-chevron" />
@@ -460,16 +459,16 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
 
       {/* Expanded Assistant Window */}
       {isOpen && (
-        <div className="guide-panel" role="region" aria-label="AI Ocean Guide Panel">
+        <div className="guide-panel" role="region" aria-label="Ocean Science Guide Panel">
           {/* Header */}
           <div className="guide-header">
             <div className="guide-header-title-wrap">
               <div className="guide-avatar-badge">
-                <Bot size={16} />
+                <BookOpen size={16} />
               </div>
               <div className="guide-title-meta">
                 <div className="guide-title-row">
-                  <h3>SAGAR AI GUIDE</h3>
+                  <h3>SAGAR OCEAN GUIDE</h3>
                   <span className="layman-badge">LAYMAN TRANSLATOR</span>
                 </div>
                 <p className="guide-subtitle">Plain-English explanations for everyone</p>
@@ -638,7 +637,7 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
                         <span className="dot" />
                         <span className="dot" />
                       </span>
-                      <span className="typing-label">SAGAR AI is thinking...</span>
+                      <span className="typing-label">Analyzing ocean telemetry...</span>
                     </div>
                   </div>
                 )}
@@ -675,7 +674,7 @@ export const OceanGuideAgent: React.FC<OceanGuideAgentProps> = ({
           {activeTab === 'tours' && (
             <div className="guide-body tours-tab">
               <p className="tours-intro">
-                Click any tour below and the AI Guide will navigate the 3D globe, dive underwater, and explain what is happening:
+                Click any tour below and the guide will navigate the 3D globe, dive underwater, and explain what is happening:
               </p>
               <div className="tours-grid">
                 {guidedTours.map((tour) => (

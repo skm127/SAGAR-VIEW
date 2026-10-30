@@ -43,6 +43,41 @@ export interface HistoricalTracksResponse {
   storms: HistoricalStorm[];
 }
 
+export interface UncertaintyConePoint {
+  time?: string;
+  lat: number;
+  lon: number;
+  radius_km: number;
+  lead_hours: number;
+}
+
+export interface LandfallImpact {
+  status: string;
+  storm_name?: string;
+  event_id?: number;
+  current_position?: { lat: number; lon: number };
+  nearest_coastal_point?: {
+    name: string;
+    lat: number;
+    lon: number;
+    state: string;
+  };
+  distance_to_coast_km: number;
+  distance_to_coast_nm: number;
+  estimated_forward_speed_kmh: number;
+  estimated_time_to_landfall_hours: number;
+  estimated_landfall_utc: string;
+  is_on_land: boolean;
+  imd_classification?: {
+    code: string;
+    name: string;
+    warning_level: string;
+  };
+  estimated_peak_surge_meters: number;
+  uncertainty_cone: UncertaintyConePoint[];
+  provenance: string;
+}
+
 export interface LiveStorm {
   event_id: number;
   episode_id: number;
@@ -59,6 +94,7 @@ export interface LiveStorm {
   report_url?: string;
   in_north_indian_ocean: boolean;
   track: TrackPoint[];
+  landfall_impact?: LandfallImpact;
 }
 
 export interface ActiveStormsResponse {

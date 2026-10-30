@@ -48,6 +48,46 @@ interface Props {
   selectedSid?: string | null;
 }
 
+function buildConeGeometry(pts: { lat: number; lon: number; radius_km: number }[]) {
+  if (pts.length < 2) return null;
+  const leftPts: THREE.Vector3[] = [];
+  const rightPts: THREE.Vector3[] = [];
+  for (let i = 0; i < pts.length; i++) {
+    const cur = pts[i];
+    let dLat = 0;
+    let dLon = 0;
+    if (i < pts.length - 1) {
+      dLat = pts[i + 1].lat - cur.lat;
+      dLon = pts[i + 1].lon - cur.lon;
+    } else {
+      dLat = cur.lat - pts[i - 1].lat;
+      dLon = cur.lon - pts[i - 1].lon;
+    }
+    const len = Math.sqrt(dLat * dLat + dLon * dLon) || 0.001;
+    const nx = -dLat / len;
+    const ny = dLon / len;
+    const degOffset = Math.min(2.5, cur.radius_km / 111.0);
+
+    const pLeft = latLonToVector3(cur.lat + nx * degOffset, cur.lon + ny * degOffset, R + 0.002);
+    const pRight = latLonToVector3(cur.lat - nx * degOffset, cur.lon - ny * degOffset, R + 0.002);
+    leftPts.push(pLeft);
+    rightPts.push(pRight);
+  }
+
+  const positions: number[] = [];
+  for (let i = 0; i < leftPts.length - 1; i++) {
+    const l1 = leftPts[i];
+    const r1 = rightPts[i];
+    const l2 = leftPts[i + 1];
+    const r2 = rightPts[i + 1];
+    positions.push(l1.x, l1.y, l1.z, r1.x, r1.y, r1.z, l2.x, l2.y, l2.z);
+    positions.push(r1.x, r1.y, r1.z, r2.x, r2.y, r2.z, l2.x, l2.y, l2.z);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  return geo;
+}
+
 export default function CycloneTracks({ historical, live, selectedSid }: Props) {
   const histObjects = useMemo(() => {
     return historical.map((s) => {
@@ -77,11 +117,23 @@ export default function CycloneTracks({ historical, live, selectedSid }: Props) 
         return line;
       };
       const head = s.track.filter((p) => !p.forecast).slice(-1)[0] ?? { lat: s.lat, lon: s.lon };
+
+      // Uncertainty cone geometry
+      const conePts = s.landfall_impact?.uncertainty_cone;
+      const coneGeo = conePts && conePts.length >= 2 ? buildConeGeometry(conePts) : null;
+
+      // Nearest coastal landfall point
+      const coastalPt = s.landfall_impact?.nearest_coastal_point;
+      const landfallPos = coastalPt ? latLonToVector3(coastalPt.lat, coastalPt.lon, R + 0.004) : null;
+
       return {
         id: s.event_id,
         observed: observed.length > 1 ? mk(observed, false) : null,
         forecast: forecast.length > 1 ? mk(forecast, true) : null,
         head: latLonToVector3(head.lat, head.lon, R + 0.006),
+        coneGeo,
+        landfallPos,
+        coastalName: coastalPt?.name,
       };
     });
   }, [live]);
@@ -110,12 +162,25 @@ export default function CycloneTracks({ historical, live, selectedSid }: Props) 
       ))}
       {liveObjects.map((o) => (
         <group key={o.id}>
+          {/* IMD/Bhuvan Uncertainty Cone */}
+          {o.coneGeo && (
+            <mesh geometry={o.coneGeo}>
+              <meshBasicMaterial color="#f59e0b" transparent opacity={0.25} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+          )}
           {o.observed && <primitive object={o.observed} />}
           {o.forecast && <primitive object={o.forecast} />}
           <mesh position={o.head}>
             <sphereGeometry args={[0.016, 16, 16]} />
             <meshBasicMaterial color="#f43f5e" />
           </mesh>
+          {/* Projected Coastal Landfall Indicator */}
+          {o.landfallPos && (
+            <mesh position={o.landfallPos}>
+              <ringGeometry args={[0.008, 0.014, 16]} />
+              <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} transparent opacity={0.8} />
+            </mesh>
+          )}
         </group>
       ))}
     </group>

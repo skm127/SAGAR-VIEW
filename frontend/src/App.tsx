@@ -57,7 +57,7 @@ const MissionBriefingModal = lazy(() => import('./components/Panels/MissionBrief
 const VerticalProfileHUD = lazy(() => import('./components/Controls/VerticalProfileHUD'));
 const OceanDossierModal = lazy(() => import('./components/Panels/OceanDossierModal'));
 const RegionAnalysisModal = lazy(() => import('./components/Panels/RegionAnalysisModal'));
-import { WeatherForecastModal } from './components/Panels/WeatherForecastModal';
+const WeatherForecastModal = lazy(() => import('./components/Panels/WeatherForecastModal').then(m => ({ default: m.WeatherForecastModal })));
 
 const TransectModal = lazy(() => import('./components/Panels/TransectModal'));
 const GlobalSearchModal = lazy(() => import('./components/Panels/GlobalSearchModal'));
@@ -86,7 +86,7 @@ import OceanGuideAgent from './components/OceanGuide/OceanGuideAgent';
 import { useLiveFeed } from './hooks/useLiveFeed';
 import { LiveConnectionIndicator } from './components/Controls/LiveConnectionIndicator';
 import { useUIStore } from './store/uiStore';
-import { Search, AlertTriangle, Bot, Activity, ChevronDown, Crosshair, Map, Brain, Database, FileText, Camera, Keyboard, Anchor, Tornado, ShieldCheck } from 'lucide-react';
+import { Search, AlertTriangle, BookOpen, Activity, ChevronDown, Crosshair, Map, Brain, Database, FileText, Camera, Keyboard, Anchor, Tornado, ShieldCheck } from 'lucide-react';
 
 function App() {
   const {
@@ -231,18 +231,23 @@ function App() {
   const [showConfidence, setShowConfidence] = useState(false);
   const [confidenceField, setConfidenceField] = useState<ConfidenceFieldResponse | null>(null);
 
+  // Deferred: cyclone data is non-critical for initial render — load after 3s
   useEffect(() => {
-    getCycloneHistory(2015).then((r) => setCycloneHistory(r.storms ?? [])).catch(() => {});
-    const loadLive = () =>
-      getActiveCyclones()
-        .then((r) => setCycloneLive((r.storms ?? []).filter((st) => st.is_current)))
-        .catch(() => {});
-    const loadAdvisories = () => getAdvisories().then(setAdvisories).catch(() => {});
-    loadLive();
-    loadAdvisories();
-    const a = setInterval(loadLive, 30 * 60 * 1000);
-    const b = setInterval(loadAdvisories, 15 * 60 * 1000);
-    return () => { clearInterval(a); clearInterval(b); };
+    let a: ReturnType<typeof setInterval>;
+    let b: ReturnType<typeof setInterval>;
+    const deferTimer = setTimeout(() => {
+      getCycloneHistory(2015).then((r) => setCycloneHistory(r.storms ?? [])).catch(() => {});
+      const loadLive = () =>
+        getActiveCyclones()
+          .then((r) => setCycloneLive((r.storms ?? []).filter((st) => st.is_current)))
+          .catch(() => {});
+      const loadAdvisories = () => getAdvisories().then(setAdvisories).catch(() => {});
+      loadLive();
+      loadAdvisories();
+      a = setInterval(loadLive, 30 * 60 * 1000);
+      b = setInterval(loadAdvisories, 15 * 60 * 1000);
+    }, 3000);
+    return () => { clearTimeout(deferTimer); clearInterval(a); clearInterval(b); };
   }, []);
 
   // Only draw hurricane-strength storms (≥ 64 kt) plus the selected one, to keep the globe readable
@@ -280,8 +285,10 @@ function App() {
   const [buoyPlatforms, setBuoyPlatforms] = useState<SensorSummary[]>([]);
   const [gliderPlatforms, setGliderPlatforms] = useState<SensorSummary[]>([]);
 
+  // Deferred: anomaly summary is non-critical for initial render — load after 3s
   useEffect(() => {
     let isMounted = true;
+    let intervalId: ReturnType<typeof setInterval>;
     const fetchAnomaly = () => {
       getAnomalySummary()
         .then((res) => {
@@ -290,17 +297,22 @@ function App() {
         .catch(() => {});
     };
 
-    fetchAnomaly(); // Initial fetch
-    // Poll every 5 minutes (300,000 ms) for real-time alerts
-    const intervalId = setInterval(fetchAnomaly, 300000);
+    const deferTimer = setTimeout(() => {
+      fetchAnomaly(); // Initial fetch (deferred)
+      // Poll every 5 minutes (300,000 ms) for real-time alerts
+      intervalId = setInterval(fetchAnomaly, 300000);
+    }, 3000);
     return () => {
       isMounted = false;
+      clearTimeout(deferTimer);
       clearInterval(intervalId);
     };
   }, [timeIndex]);
 
+  // Deferred: observation platforms are non-critical for initial render — load after 3s
   useEffect(() => {
     let isMounted = true;
+    let intervalId: ReturnType<typeof setInterval>;
     const fetchObservations = () => {
       getAllObservations()
         .then((res) => {
@@ -314,11 +326,14 @@ function App() {
         .catch(() => {});
     };
 
-    fetchObservations(); // Initial fetch
-    // Poll every 5 minutes (300,000 ms) for new platforms
-    const intervalId = setInterval(fetchObservations, 300000);
+    const deferTimer = setTimeout(() => {
+      fetchObservations(); // Initial fetch (deferred)
+      // Poll every 5 minutes (300,000 ms) for new platforms
+      intervalId = setInterval(fetchObservations, 300000);
+    }, 3000);
     return () => {
       isMounted = false;
+      clearTimeout(deferTimer);
       clearInterval(intervalId);
     };
   }, [argoProfiles.length]);
@@ -423,15 +438,17 @@ function App() {
     const map: Record<string, string> = {};
     for (const f of anomalySummary?.fleet ?? []) map[f.platform_id] = f.status;
     
+    // Add cyclone proximity context without corrupting or fabricating physical model anomaly status
     const allPlatforms = [...argoProfiles, ...buoyPlatforms, ...gliderPlatforms];
     for (const p of allPlatforms) {
+      if (map[p.platform_id] && map[p.platform_id] !== 'NOMINAL') {
+        continue; // Keep authentic ML anomaly status if already set
+      }
       for (const storm of cycloneLive) {
         const dist = Math.hypot(p.latitude - storm.lat, p.longitude - storm.lon);
         if (dist < 3.5) {
-          map[p.platform_id] = 'CRITICAL_ANOMALY';
+          map[p.platform_id] = 'CYCLONE_PROXIMITY';
           break;
-        } else if (dist < 6.0 && map[p.platform_id] !== 'CRITICAL_ANOMALY') {
-          map[p.platform_id] = 'WARNING';
         }
       }
     }
@@ -687,10 +704,10 @@ function App() {
           <button
             className={`c2-badge ai-guide-top-btn ${guideOpen ? 'active' : ''}`}
             onClick={() => setGuideOpen((prev) => !prev)}
-            title="Open Layman AI Ocean Guide (Key: G) - Plain-English translation of everything on screen"
+            title="Open Ocean Science Guide (Key: G) - Layman translation of oceanographic parameters"
           >
-            <Bot size={14} />
-            <span>AI GUIDE</span>
+            <BookOpen size={14} />
+            <span>OCEAN GUIDE</span>
           </button>
 
           {/* Real-Time Live Ocean Data & Predictions */}
@@ -754,7 +771,7 @@ function App() {
                 </button>
                 <button className="tools-menu-item" onClick={() => { setAiModalOpen(true); setToolsMenuOpen(false); }}>
                   <Brain size={14} />
-                  <span className="item-text">Grounded ML Analyst</span>
+                  <span className="item-text">Ocean Diagnostic Analyst</span>
                 </button>
                 <button className="tools-menu-item" onClick={() => { setCoLocationOpen(true); setToolsMenuOpen(false); }}>
                   <Database size={14} />
@@ -979,30 +996,35 @@ function App() {
           onCameraFlightComplete={() => setTargetCameraPos(null)}
         />
 
-        {/* Windy Map Overlay */}
-        {windyOverlay && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: 10,
-              backgroundColor: '#000',
-              pointerEvents: 'auto',
-            }}
-          >
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=5&overlay=${windyOverlay}&product=ecmwf&level=surface&lat=22.2&lon=83.8`}
-              frameBorder="0"
-              style={{ border: 'none' }}
-              title={`Live Radar: ${windyOverlay}`}
-            ></iframe>
-          </div>
-        )}
+        {/* Windy Map Overlay (Dynamically centered on active cyclone or ocean domain) */}
+        {windyOverlay && (() => {
+          const activeNioStorm = cycloneLive.find((st) => st.in_north_indian_ocean);
+          const radarLat = activeNioStorm?.lat ?? probedCoord?.lat ?? 15.0;
+          const radarLon = activeNioStorm?.lon ?? probedCoord?.lon ?? 86.5;
+          return (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 10,
+                backgroundColor: '#000',
+                pointerEvents: 'auto',
+              }}
+            >
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=5&overlay=${windyOverlay}&product=ecmwf&level=surface&lat=${radarLat}&lon=${radarLon}`}
+                frameBorder="0"
+                style={{ border: 'none' }}
+                title={`Live Radar: ${windyOverlay}`}
+              ></iframe>
+            </div>
+          );
+        })()}
 
         {/* Floating Vertical Profile Sounding HUD */}
         {profileHudData.isOpen && (
@@ -1152,7 +1174,7 @@ function App() {
                 </div>
                 <div className="hotkey-row">
                   <kbd>A / I</kbd>
-                  <span>Grounded Ocean Analyst AI</span>
+                  <span>Ocean Diagnostic Analyst</span>
                 </div>
                 <div className="hotkey-row">
                   <kbd>L</kbd>
@@ -1346,8 +1368,8 @@ function App() {
         <WeatherForecastModal
           isOpen={showWeatherForecast}
           onClose={() => setShowWeatherForecast(false)}
-          lat={22.2}
-          lon={83.8}
+          lat={cycloneLive.find((st) => st.in_north_indian_ocean)?.lat ?? probedCoord?.lat ?? 15.0}
+          lon={cycloneLive.find((st) => st.in_north_indian_ocean)?.lon ?? probedCoord?.lon ?? 86.5}
         />
 
         {/* Model Trust (depth-band skill + spatial confidence) */}

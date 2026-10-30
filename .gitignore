@@ -49,3 +49,5 @@ backend/data/
 # Mobile app (separate project, not for web deployment)
 mobile/
 
+
+deploy-backend-local.env

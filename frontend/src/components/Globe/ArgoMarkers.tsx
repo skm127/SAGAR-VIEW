@@ -54,7 +54,8 @@ function SingleBuoy({
   const status = platformStatus?.[profile.platform_id];
   const isCritical = status === 'CRITICAL_ANOMALY';
   const isWarning = status === 'WARNING';
-  const statusColor = isCritical ? '#ef4444' : isWarning ? '#f59e0b' : '#10b981';
+  const isCycloneZone = status === 'CYCLONE_PROXIMITY';
+  const statusColor = isCritical ? '#ef4444' : isWarning ? '#f59e0b' : isCycloneZone ? '#38bdf8' : '#10b981';
 
   // Radar ping & beacon blink animation
   useFrame(({ clock }) => {

@@ -75,6 +75,16 @@ def cyclone_live_watch(event_id: int, request: Request):
     return request.app.state.cyclone_service.live_watch(event_id, request.app.state.nc_service)
 
 
+@router.get("/api/cyclones/landfall-impact/{event_id}")
+def cyclone_landfall_impact(event_id: int, request: Request):
+    """Live coastal landfall assessment, ETA countdown and IMD uncertainty cone."""
+    feed = request.app.state.cyclone_service.active_storms()
+    storm = next((s for s in feed.get("storms", []) if str(s.get("event_id")) == str(event_id)), None)
+    if not storm:
+        raise HTTPException(404, f"No active cyclone found with event_id {event_id}")
+    return request.app.state.cyclone_service.assess_landfall_impact(storm)
+
+
 # ── Model trust ───────────────────────────────────────────────────────────
 @router.get("/api/skill/depth-bands")
 def skill_depth_bands(request: Request, variable: Literal["thetao", "so"] = "thetao"):

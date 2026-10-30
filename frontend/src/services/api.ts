@@ -292,7 +292,7 @@ export async function calculateTransect(params: {
   } catch (e) { throw e; }
 }
 
-/** Grounded AI ocean analyst query */
+/** Grounded ocean diagnostic query */
 export async function queryAiAnalyst(params: {
   query: string;
   lat?: number;
@@ -434,7 +434,7 @@ export async function getRealtimeFleet(): Promise<LiveFleetResponse> {
 }
 
 /**
- * Send a message to the AI Guide chatbot and get an intelligent response.
+ * Send a query to the Ocean Science Guide.
  */
 export interface GuideChatMessage {
   sender: 'user' | 'ai';

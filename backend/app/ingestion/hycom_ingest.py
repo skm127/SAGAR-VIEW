@@ -86,13 +86,18 @@ def _regrid_snapshot(path: str, ds_key: str, target_lat: np.ndarray, target_lon:
     return out, t_actual
 
 
+# Maximum wall-clock seconds before we abort to avoid hosting CPU monitors
+# (Antideploy kills containers that peg CPU for 10+ minutes).
+INGESTION_TIMEOUT_SECONDS = float(os.environ.get("INGESTION_TIMEOUT_SECONDS", "480"))  # 8 min default
+
+
 def fetch_hycom_ocean_model(
     output_filepath: str,
     days_back: int = 4,
     days_forward: int = 2,
     bounds: Optional[Dict[str, float]] = None,
     horiz_stride: int = 4,
-    max_workers: int = 4,
+    max_workers: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Download a multi-day HYCOM subset and write a CF-compliant NetCDF file.
 
@@ -100,6 +105,8 @@ def fetch_hycom_ocean_model(
     every requested day for temperature/salinity succeeded; a partial download
     never overwrites a good dataset.
     """
+    if max_workers is None:
+        max_workers = int(os.environ.get("HYCOM_MAX_WORKERS", "2"))
     b = {**DEFAULT_BOUNDS, **(bounds or {})}
     now = datetime.now(timezone.utc)
     today_noon = now.replace(hour=12, minute=0, second=0, microsecond=0)
@@ -122,12 +129,24 @@ def fetch_hycom_ocean_model(
         steps: List[xr.Dataset] = []
         step_times: List[datetime] = []
         for day in days:
+            # CPU budget guard: abort before hosting monitor kills the container
+            elapsed_so_far = time.time() - started
+            if elapsed_so_far > INGESTION_TIMEOUT_SECONDS:
+                logger.warning(
+                    "HYCOM ingestion approaching CPU budget (%.0fs/%.0fs) — stopping with %d steps so far",
+                    elapsed_so_far, INGESTION_TIMEOUT_SECONDS, len(steps),
+                )
+                break
+
             ts_path = results.get(("ts3z", day))
             uv_path = results.get(("uv3z", day))
             if not ts_path:
                 logger.warning("HYCOM temperature/salinity missing for %s — skipping this day", day.date())
                 continue
             ts, t_actual = _regrid_snapshot(ts_path, "ts3z", target_lat, target_lon, b["depth_max"])
+            # Yield CPU between regrid operations to prevent sustained 100% saturation
+            # that triggers hosting platform CPU monitors (Antideploy, Render, etc.)
+            time.sleep(0.5)
             if abs((t_actual - day).total_seconds()) > 6 * 3600:
                 # NCSS snaps to the nearest available time; beyond the forecast
                 # horizon that would silently duplicate the last step.
@@ -135,6 +154,7 @@ def fetch_hycom_ocean_model(
                 continue
             if uv_path:
                 uv, _ = _regrid_snapshot(uv_path, "uv3z", target_lat, target_lon, b["depth_max"])
+                time.sleep(0.5)  # yield after UV regrid too
                 ts = xr.merge([ts, uv])
             else:
                 for v in ("uo", "vo"):

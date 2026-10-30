@@ -5,7 +5,7 @@ from typing import Literal, Optional, Any
 from datetime import datetime, timezone
 import numpy as np
 import math
-from ..models.schemas import (
+from app.models.schemas import (
     HeatPotentialResponse,
     HeatPotentialPoint,
     CoLocationResponse,

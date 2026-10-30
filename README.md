@@ -365,7 +365,7 @@ An operational metadata inspector for scientific validation:
 - Draws a geographic bounding box over any basin area.
 - Computes surface area ($\text{km}^2$), minimum, maximum, mean, and standard deviation, accompanied by value distribution histograms.
 
-### Grounded AI Ocean Analyst (Hotkey `A`)
+### Ocean Diagnostic Analyst (Hotkey `A`)
 - Residual-grounded natural language diagnostic engine that synthesizes physical oceanography observations into natural language briefings.
 
 ---
@@ -384,7 +384,7 @@ An operational metadata inspector for scientific validation:
 | `T` | **Vertical Transect Tool** | Opens 2D depth-distance cross-section modal |
 | `R` | **Basin Regional Analytics** | Opens bounding box statistics and histogram tool |
 | `P` | **Vertical Sounding HUD** | Toggles dual-curve depth sounding profile |
-| `A` | **Grounded AI Analyst** | Opens natural language ocean diagnostic engine |
+| `A` | **Ocean Diagnostic Analyst** | Opens oceanographic diagnostic engine |
 | `F` | **Fleet Registry** | Opens in-situ multi-sensor fleet drawer |
 | `B` | **Mission Briefing** | Opens SIH 2026 PS26067 evaluation guide |
 | `Y` | **Cyclone Intelligence** | Live GDACS storms, TCHP along forecast track, historical RI backtests |

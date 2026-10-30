@@ -182,11 +182,12 @@ class CoLocationResponse(BaseModel):
 
 
 class AnomalyFeatures(BaseModel):
-    mean_delta: float
-    max_delta: float
-    upper_200m_heat_delta: float
-    thermocline_gradient_diff: float
-    max_layer_depth: float
+    mean_delta: Optional[float] = None
+    max_delta: Optional[float] = None
+    signed_max_delta: Optional[float] = None
+    upper_200m_heat_delta: Optional[float] = None
+    thermocline_gradient_diff: Optional[float] = None
+    max_layer_depth: Optional[float] = None
 
 
 class AnomalyFleetMember(BaseModel):
@@ -235,6 +236,7 @@ class AnomalyAnalysisResponse(BaseModel):
     severity: str
     features: AnomalyFeatures
     hypothesis: str
+    advisories: Optional[List[str]] = None
     anomalous_layer_count: int
     anomalous_depth_range: Optional[List[float]] = None
     layer_breakdown: List[AnomalyLayerEntry]

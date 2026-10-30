@@ -63,7 +63,7 @@ export default function MissionBriefingModal({
               operational ocean models (this platform ingests the <strong>HYCOM ESPC-D-V02</strong> analysis/forecast live, or <strong>CMEMS</strong> with credentials) forecast water temperatures, salinity, and currents across India's maritime domain. 
               However, ocean models frequently miscalculate subsurface mixing, missing dangerous trapped heat pools. 
               <strong> SAGAR VIEW</strong> automatically compares model predictions against in-situ robotic <strong>Argo profiling floats</strong>, 
-              using machine learning to detect anomalies before they fuel severe tropical cyclones.
+              using unsupervised anomaly detection algorithms before they fuel severe tropical cyclones.
             </p>
           </div>
 
@@ -85,7 +85,7 @@ export default function MissionBriefingModal({
             </div>
             <div className="briefing-pillar">
               <div className="pillar-icon"><Cpu size={20} /></div>
-              <h4>3. AI Anomaly Detection</h4>
+              <h4>3. Subsurface Anomaly Detection</h4>
               <p>
                 An <strong>Isolation Forest</strong> algorithm analyzes multi-depth vertical divergence, thermocline gradient drift, and heat anomalies to identify operational risks.
               </p>

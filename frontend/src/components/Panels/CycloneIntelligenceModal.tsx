@@ -311,6 +311,49 @@ export const CycloneIntelligenceModal: React.FC<Props> = ({ isOpen, onClose, onS
                       </button>
                     </div>
                   </div>
+                  {s.landfall_impact && s.landfall_impact.status === 'ok' && (
+                    <div className="ci-landfall-card" style={{
+                      marginTop: '8px',
+                      padding: '10px 12px',
+                      background: 'rgba(15, 23, 42, 0.65)',
+                      border: '1px solid rgba(245, 158, 11, 0.35)',
+                      borderRadius: '8px',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          ⚡ Coastal Landfall Threat & ETA
+                        </span>
+                        <span style={{
+                          fontSize: '10px',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: s.landfall_impact.is_on_land ? '#ef4444' : '#3b82f6',
+                          color: '#fff',
+                          fontWeight: 600
+                        }}>
+                          {s.landfall_impact.is_on_land ? 'LANDFALL ACTIVE' : `${s.landfall_impact.estimated_time_to_landfall_hours}h to coast`}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '11px' }}>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '10px' }}>Target Shoreline</div>
+                          <strong style={{ color: '#f1f5f9' }}>{s.landfall_impact.nearest_coastal_point?.name ?? 'Indian Coastline'}</strong>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '10px' }}>Coastal Distance</div>
+                          <strong style={{ color: '#38bdf8' }}>{s.landfall_impact.distance_to_coast_km} km ({s.landfall_impact.distance_to_coast_nm} nm)</strong>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '10px' }}>IMD Intensity Class</div>
+                          <strong style={{ color: '#f59e0b' }}>{s.landfall_impact.imd_classification?.name ?? 'Tropical Cyclone'}</strong>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '10px' }}>Est. Peak Surge</div>
+                          <strong style={{ color: '#ec4899' }}>+{s.landfall_impact.estimated_peak_surge_meters} m</strong>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {w && (
                     <div className="ci-watch">
                       {w.status === 'not_found' && <div className="ci-error">{w.message}</div>}

@@ -60,8 +60,8 @@ export const AiAnalystModal: React.FC<AiAnalystModalProps> = ({
         setLoading(false);
       })
       .catch((err) => {
-        const msg = err.response?.data?.detail || err.message || 'AI grounding calculation failed';
-        showToast(msg, 'error', 'AI Analyst Error');
+        const msg = err.response?.data?.detail || err.message || 'Ocean diagnostic calculation failed';
+        showToast(msg, 'error', 'Ocean Analyst Error');
         setError(msg);
         setLoading(false);
       });
@@ -76,7 +76,7 @@ export const AiAnalystModal: React.FC<AiAnalystModalProps> = ({
         className="ai-modal-card"
         role="dialog"
         aria-modal="true"
-        aria-label="Grounded Oceanographic Analyst"
+        aria-label="Oceanographic Diagnostic Analyst"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
@@ -85,7 +85,7 @@ export const AiAnalystModal: React.FC<AiAnalystModalProps> = ({
         <div className="ai-header">
           <div className="ai-badge-row">
             <span className="ai-badge-tag"><Sparkles size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />GROUNDED OCEANOGRAPHIC INTELLIGENCE</span>
-            <span className="ai-hallucination-badge">ZERO HALLUCINATION // EVIDENCE-BACKED</span>
+            <span className="ai-hallucination-badge">EMPIRICAL SENSOR GROUNDING // IN-SITU VERIFIED</span>
           </div>
           <div className="ai-title-row">
             <h2 className="ai-title">OCEAN ANALYST</h2>
@@ -111,12 +111,12 @@ export const AiAnalystModal: React.FC<AiAnalystModalProps> = ({
               disabled={loading || !queryText.trim()}
               onClick={() => handleRunAnalysis(queryText)}
             >
-              {loading ? 'ANALYZING...' : 'RUN INFERENCE'}
+              {loading ? 'ANALYZING...' : 'RUN ANALYSIS'}
             </button>
           </div>
 
           <div className="ai-preset-queries">
-            <span className="queries-label">Scientific Prompts:</span>
+            <span className="queries-label">Scientific Inquiries:</span>
             {SAMPLE_QUERIES.map((q) => (
               <button
                 key={q}
@@ -251,7 +251,7 @@ export const AiAnalystModal: React.FC<AiAnalystModalProps> = ({
           {!loading && !analysis && !error && (
             <div className="ai-empty-state">
               <span className="empty-icon"><Sparkles size={24} /></span>
-              <p>Select a scientific prompt above or type a custom inquiry to run grounded inference.</p>
+              <p>Select a scientific inquiry above or specify coordinates to run grounded analysis.</p>
             </div>
           )}
         </div>

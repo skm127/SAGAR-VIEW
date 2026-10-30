@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 import logging
 import os
 
-# Load .env file for API keys (GEMINI_API_KEY, etc.)
+# Load .env file for environment configuration
 load_dotenv()
 
 from app.config import get_settings
@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI):
     scheduler_service = SchedulerService(settings=settings, app_state=app.state)
     scheduler_service.start()
 
-    # Initialize AI Guide Service (Gemini-powered chatbot)
+    # Initialize Ocean Science Guide Service
     guide_service = GuideService()
     guide_service.initialize()
     
@@ -185,6 +185,21 @@ async def add_response_headers(request: Request, call_next):
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+
+    # Cache-Control: reduce redundant re-fetches on page reload
+    path = request.url.path
+    if path.startswith("/api/model/") or path.startswith("/api/observations/"):
+        # Ocean model slices & observation data: cache for 5 minutes
+        response.headers.setdefault("Cache-Control", "public, max-age=300")
+    elif path.startswith("/api/intelligence/cyclones/history"):
+        # Historical cyclone data changes rarely: cache for 30 minutes
+        response.headers.setdefault("Cache-Control", "public, max-age=1800")
+    elif path.startswith("/api/intelligence/") or path.startswith("/api/anomaly/"):
+        # Live intelligence & anomaly: cache for 2 minutes
+        response.headers.setdefault("Cache-Control", "public, max-age=120")
+    elif path.startswith("/api/health") or path.startswith("/api/realtime/"):
+        response.headers.setdefault("Cache-Control", "no-store")
+
     return response
 
 # Register routers
