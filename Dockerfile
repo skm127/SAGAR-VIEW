@@ -35,7 +35,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Antideploy/Fly.io sometimes injects DATABASE_URL pointing to
 # PostgreSQL, but we only need SQLite. Unsetting prevents crashes.
 ENV DATABASE_URL="" \
-    REDIS_URL=""
+    REDIS_URL="" \
+    COPERNICUS_USERNAME="" \
+    COPERNICUS_PASSWORD="" \
+    MODEL_PROVIDER="HYCOM" 
 
 WORKDIR /app
 

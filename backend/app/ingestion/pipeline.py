@@ -22,7 +22,9 @@ last_refresh: Dict[str, Any] = {}
 
 def refresh_model(settings) -> Dict[str, Any]:
     out_path = settings.model_data_path
-    if settings.copernicus_username and settings.copernicus_password:
+    # HYCOM (US Navy) is the default high-speed real-data provider (takes ~30s vs 50+ min for CMEMS).
+    provider = os.environ.get("MODEL_PROVIDER", "HYCOM").upper()
+    if provider == "CMEMS" and settings.copernicus_username and settings.copernicus_password:
         from app.ingestion.copernicus_ingest import fetch_cmems_ocean_model
         res = fetch_cmems_ocean_model(out_path, settings.copernicus_username, settings.copernicus_password)
         if res.get("is_live_ingested"):
