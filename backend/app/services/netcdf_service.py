@@ -3,6 +3,7 @@
 Handles lazy loading of NetCDF datasets and provides methods for
 spatial/depth/time subsetting. Never loads full datasets into memory.
 """
+import os
 import xarray as xr
 import numpy as np
 from typing import Optional, Tuple, Dict, Any, List
@@ -22,13 +23,52 @@ class NetCDFService:
         # service — used by the UI freshness badge (Phase 2c).
         self.loaded_at = None
     
-    def load(self) -> bool:
-        """Load dataset with lazy chunking (data not read until accessed)."""
+    def load_baseline(self) -> bool:
+        """Generate an instant in-memory ocean state for zero-wait startup."""
         try:
-            # The regional subset is small (~60 MB as float32), so load it fully
-            # into memory and release the file handle. This lets the scheduled
-            # refresh atomically replace the file (required on Windows) and
-            # makes hot-reload a simple pointer swap.
+            from datetime import datetime, timezone, timedelta
+            lat = np.arange(0.0, 28.25, 0.25)
+            lon = np.arange(60.0, 100.25, 0.25)
+            depth = np.array([0, 5, 10, 20, 30, 50, 75, 100, 150, 200, 250, 300, 400, 500], dtype=np.float32)
+            now = datetime.now(timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0)
+            time_arr = [now + timedelta(days=i) for i in range(2)]
+            shape = (len(time_arr), len(depth), len(lat), len(lon))
+            base_temp = (28.5 - (lat[:, None] * 0.1)) + np.zeros((len(lat), len(lon)))
+            decay = np.exp(-depth / 150.0)[:, None, None]
+            thetao_3d = 8.0 + (base_temp - 8.0)[None, :, :] * decay
+            thetao = np.repeat(thetao_3d[None, :, :, :], len(time_arr), axis=0).astype(np.float32)
+            so = np.full(shape, 34.5, dtype=np.float32)
+            uo = np.zeros(shape, dtype=np.float32)
+            vo = np.zeros(shape, dtype=np.float32)
+            ds = xr.Dataset(
+                data_vars={
+                    'thetao': (['time', 'depth', 'lat', 'lon'], thetao, {'units': 'degC', 'long_name': 'Sea water temperature'}),
+                    'so': (['time', 'depth', 'lat', 'lon'], so, {'units': 'psu', 'long_name': 'Sea water salinity'}),
+                    'uo': (['time', 'depth', 'lat', 'lon'], uo, {'units': 'm s-1', 'long_name': 'Eastward velocity'}),
+                    'vo': (['time', 'depth', 'lat', 'lon'], vo, {'units': 'm s-1', 'long_name': 'Northward velocity'}),
+                },
+                coords={'time': time_arr, 'depth': depth, 'lat': lat, 'lon': lon},
+                attrs={'is_synthetic': 'true', 'title': 'SAGAR VIEW Instant Warmup Baseline', 'source': 'Baseline Warmup'}
+            )
+            old = self.dataset
+            self.dataset = ds
+            if old is not None:
+                old.close()
+            self._is_loaded = True
+            self.loaded_at = datetime.now(timezone.utc).isoformat()
+            logger.info("Initialized instant in-memory NetCDF baseline (%d time steps, %d depth levels)", len(time_arr), len(depth))
+            return True
+        except Exception as e:
+            logger.error(f"Failed to generate in-memory baseline NetCDF: {e}")
+            self._is_loaded = False
+            return False
+
+    def load(self) -> bool:
+        """Load dataset with lazy chunking; falls back to instant baseline if file missing."""
+        if not os.path.exists(self.filepath):
+            logger.info(f"NetCDF file {self.filepath} not yet on disk — loading instant baseline")
+            return self.load_baseline()
+        try:
             with xr.open_dataset(self.filepath, engine="netcdf4") as ds:
                 loaded = ds.load()
             old = self.dataset
@@ -43,9 +83,8 @@ class NetCDFService:
             logger.info(f"  Dimensions: {dict(self.dataset.sizes)}")
             return True
         except Exception as e:
-            logger.error(f"Failed to load NetCDF: {e}")
-            self._is_loaded = False
-            return False
+            logger.warning(f"Failed to load NetCDF file ({e}) — falling back to instant baseline")
+            return self.load_baseline()
     
     @property
     def is_loaded(self) -> bool:

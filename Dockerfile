@@ -55,10 +55,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/app ./app
 COPY scripts ./scripts
 
-# Generate sample data at build time (baked into image)
-RUN mkdir -p /app/data/model /app/data/argo \
-    && python scripts/generate_sample_data.py \
-    && (cp -rf /app/backend/data/* /app/data/ 2>/dev/null || true)
+# Data directories
+RUN mkdir -p /app/data/model /app/data/argo
 
 # Copy built frontend into a static directory
 COPY --from=frontend-build /build/dist /app/static
