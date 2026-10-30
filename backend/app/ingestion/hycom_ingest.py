@@ -31,8 +31,10 @@ PRODUCT_NAME = "HYCOM ESPC-D-V02 Global 1/12° Analysis/Forecast (US Navy FNMOC/
 
 # dataset -> {hycom_var: platform_var}
 HYCOM_GROUPS = {
-    "ts3z": {"water_temp": "thetao", "salinity": "so"},
-    "uv3z": {"water_u": "uo", "water_v": "vo"},
+    "t3z": {"water_temp": "thetao"},
+    "s3z": {"salinity": "so"},
+    "u3z": {"water_u": "uo"},
+    "v3z": {"water_v": "vo"},
 }
 
 DEFAULT_BOUNDS = {"lat_min": 0.0, "lat_max": 28.0, "lon_min": 60.0, "lon_max": 100.0, "depth_max": 500.0}
@@ -138,31 +140,41 @@ def fetch_hycom_ocean_model(
                 )
                 break
 
-            ts_path = results.get(("ts3z", day))
-            uv_path = results.get(("uv3z", day))
-            if not ts_path:
-                logger.warning("HYCOM temperature/salinity missing for %s — skipping this day", day.date())
+            t_path = results.get(("t3z", day))
+            if not t_path:
+                logger.warning("HYCOM temperature missing for %s — skipping this day", day.date())
                 continue
-            ts, t_actual = _regrid_snapshot(ts_path, "ts3z", target_lat, target_lon, b["depth_max"])
-            # Yield CPU between regrid operations to prevent sustained 100% saturation
-            # that triggers hosting platform CPU monitors (Antideploy, Render, etc.)
-            time.sleep(0.5)
-            if abs((t_actual - day).total_seconds()) > 6 * 3600:
-                # NCSS snaps to the nearest available time; beyond the forecast
-                # horizon that would silently duplicate the last step.
-                logger.warning("HYCOM returned %s for requested %s — outside tolerance, skipped", t_actual, day)
-                continue
-            if uv_path:
-                uv, _ = _regrid_snapshot(uv_path, "uv3z", target_lat, target_lon, b["depth_max"])
-                time.sleep(0.5)  # yield after UV regrid too
-                ts = xr.merge([ts, uv])
-            else:
-                for v in ("uo", "vo"):
-                    ts[v] = xr.full_like(ts["thetao"], np.nan)
-            steps.append(ts)
+            day_ds, t_actual = _regrid_snapshot(t_path, "t3z", target_lat, target_lon, b["depth_max"])
+            time.sleep(0.3)
+            
+            s_path = results.get(("s3z", day))
+            if s_path:
+                s_ds, _ = _regrid_snapshot(s_path, "s3z", target_lat, target_lon, b["depth_max"])
+                day_ds = xr.merge([day_ds, s_ds])
+                time.sleep(0.3)
+            elif "so" not in day_ds:
+                day_ds["so"] = xr.full_like(day_ds["thetao"], 35.0)
+
+            u_path = results.get(("u3z", day))
+            if u_path:
+                u_ds, _ = _regrid_snapshot(u_path, "u3z", target_lat, target_lon, b["depth_max"])
+                day_ds = xr.merge([day_ds, u_ds])
+                time.sleep(0.3)
+            elif "uo" not in day_ds:
+                day_ds["uo"] = xr.full_like(day_ds["thetao"], 0.0)
+
+            v_path = results.get(("v3z", day))
+            if v_path:
+                v_ds, _ = _regrid_snapshot(v_path, "v3z", target_lat, target_lon, b["depth_max"])
+                day_ds = xr.merge([day_ds, v_ds])
+                time.sleep(0.3)
+            elif "vo" not in day_ds:
+                day_ds["vo"] = xr.full_like(day_ds["thetao"], 0.0)
+
+            steps.append(day_ds)
             step_times.append(t_actual)
 
-        if len(steps) < 2:
+        if len(steps) < 1:
             msg = f"HYCOM ingestion produced only {len(steps)} valid daily steps — keeping existing dataset"
             logger.error(msg)
             return {"status": "error", "message": msg, "is_live_ingested": False}

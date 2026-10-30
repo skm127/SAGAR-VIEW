@@ -18,7 +18,7 @@ import os
 from datetime import datetime, timedelta
 
 # Output directory
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'backend', 'data')
+DATA_DIR = os.environ.get("DATA_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'backend', 'data')
 MODEL_DIR = os.path.join(DATA_DIR, 'model')
 ARGO_DIR = os.path.join(DATA_DIR, 'argo')
 

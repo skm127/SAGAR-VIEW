@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     # or older than this many hours. Set to 0 to disable (e.g. in tests/CI).
     startup_refresh_max_age_hours: float = 12.0
     argo_days_back: int = 21
-    model_days_back: int = 4
-    model_days_forward: int = 2
+    model_days_back: int = 1
+    model_days_forward: int = 1
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

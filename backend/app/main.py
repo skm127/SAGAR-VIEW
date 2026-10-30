@@ -46,10 +46,19 @@ async def lifespan(app: FastAPI):
         nc_service.load()
     else:
         # Instant startup fallback: load baked-in baseline while live HYCOM refreshes in background
-        sample_path = os.path.join(settings.data_dir, "model", "sample_bob_model.nc")
-        if os.path.exists(sample_path):
-            logger.info("Serving baseline model from %s while live data refreshes in background", sample_path)
-            nc_service = NetCDFService(sample_path)
+        candidate_paths = [
+            os.path.join(settings.data_dir, "model", "sample_bob_model.nc"),
+            "/app/data/model/sample_bob_model.nc",
+            "/app/backend/data/model/sample_bob_model.nc",
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "model", "sample_bob_model.nc"),
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", "data", "model", "sample_bob_model.nc"),
+            "data/model/sample_bob_model.nc",
+            "backend/data/model/sample_bob_model.nc",
+        ]
+        found_sample = next((cp for cp in candidate_paths if os.path.exists(cp)), None)
+        if found_sample:
+            logger.info("Serving baseline model from %s while live data refreshes in background", found_sample)
+            nc_service = NetCDFService(found_sample)
             nc_service.load()
         else:
             logger.warning("Model data not found at %s — a live refresh will be started", settings.model_data_path)
