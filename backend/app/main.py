@@ -44,15 +44,19 @@ async def lifespan(app: FastAPI):
     nc_service = NetCDFService(settings.model_data_path)
     nc_service.load()
 
-    # Real QC'd Argo profiles (Argo GDAC via ERDDAP)
+    # Real QC'd Argo profiles (Argo GDAC via ERDDAP) with packaged fallback
     argo_service = ArgoService(settings.argo_data_path)
-    if os.path.exists(settings.argo_data_path):
-        argo_service.load()
-    else:
+    if not argo_service.load():
         logger.warning("Argo cache not found at %s — a live refresh will be started", settings.argo_data_path)
 
     # Initialize Anomaly Intelligence service
     anomaly_service = AnomalyService()
+    if argo_service.is_loaded and nc_service.is_loaded:
+        try:
+            logger.info("Calibrating Isolation Forest on live Argo fleet residuals...")
+            anomaly_service.fit_on_live_fleet(argo_service, nc_service)
+        except Exception as e:
+            logger.warning("Startup fleet anomaly fit skipped (%s)", e)
     cyclone_service = CycloneService(cache_dir=os.path.join(settings.data_dir, "cyclones"))
 
     # Initialize Multi-Tier Cache Service (In-memory + Redis)

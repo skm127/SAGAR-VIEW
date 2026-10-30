@@ -316,6 +316,7 @@ export interface DataStatusResponse {
     n_argo_profiles: number;
     n_unique_floats: number;
     n_moored_buoys?: number;
+    n_gliders?: number;
     levels_qc_passed?: number;
     levels_qc_rejected?: number;
     profiles_qc_rejected?: number;

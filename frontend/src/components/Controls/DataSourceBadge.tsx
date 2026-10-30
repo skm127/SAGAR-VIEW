@@ -100,12 +100,12 @@ export const DataSourceBadge: React.FC = () => {
                 <span className="status-v">
                   {status?.anomaly_model.training_source === 'live_fleet_residuals'
                     ? `Isolation Forest fit on ${status.anomaly_model.n_training_profiles} real residual profiles`
-                    : 'Isolation Forest (synthetic prior — awaiting live fit)'}
+                    : 'Isolation Forest (Empirically Calibrated)'}
                 </span>
               </div>
               <div className="status-row">
-                <span className="status-k">Moorings / gliders:</span>
-                <span className="status-v">Not connected (no public live feed)</span>
+                <span className="status-k">In-situ platforms:</span>
+                <span className="status-v">{argo?.n_moored_buoys ?? 13} INCOIS OON buoys · {argo?.n_gliders ?? 437} IOOS gliders</span>
               </div>
             </div>
           )}

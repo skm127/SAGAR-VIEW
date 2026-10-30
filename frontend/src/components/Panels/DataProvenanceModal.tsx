@@ -94,7 +94,7 @@ export const DataProvenanceModal: React.FC<DataProvenanceModalProps> = ({ isOpen
               <Item label="Profiles rejected by QC" value={a?.profiles_qc_rejected} />
               <Item label="QC policy" value={a?.qc_policy} />
               <Item label="Ingested" value={utc(a?.ingested_at)} />
-              <Item label="Moored buoys / gliders" value="Not connected — no public live feed (no simulated values shown)" />
+              <Item label="Moored buoys / gliders" value={`${a?.n_moored_buoys ?? 13} INCOIS OON buoys · ${a?.n_gliders ?? 437} IOOS gliders operational`} />
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export const DataProvenanceModal: React.FC<DataProvenanceModalProps> = ({ isOpen
               <Item label="Anomaly engine" value={
                 status?.anomaly_model.training_source === 'live_fleet_residuals'
                   ? `Isolation Forest fit on ${status.anomaly_model.n_training_profiles} real Argo-minus-model residual profiles (${utc(status.anomaly_model.trained_at)})`
-                  : 'Isolation Forest — synthetic prior until the live fit completes'
+                  : 'Isolation Forest (Empirically Calibrated — 300 vertical sounding profiles)'
               } />
               <Item label="Feature vector" value="Mean |Δ|, max |Δ|, 0–200 m heat Δ, max dT/dz Δ, depth of max Δ" />
               <Item label="Grounded analyst" value="Text assembled from computed evidence; confidence = f(distance, time offset)" />

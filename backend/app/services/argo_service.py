@@ -146,11 +146,20 @@ class ArgoService:
 
     # ── Loading ─────────────────────────────────────────────────────────
     def load(self) -> bool:
-        """Load the QC'd Argo cache written by the ERDDAP ingestion."""
+        """Load the QC'd Argo cache written by the ERDDAP ingestion with packaged fallback."""
         try:
-            if not os.path.exists(self.filepath):
+            target_path = self.filepath
+            if not os.path.exists(target_path):
+                candidates = [
+                    os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "argo_live_profiles.json"),
+                    os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "argo", "argo_live_profiles.json"),
+                    "/app/app/data/argo_live_profiles.json",
+                    "/app/data/argo/argo_live_profiles.json",
+                ]
+                target_path = next((c for c in candidates if os.path.exists(c)), None)
+            if not target_path or not os.path.exists(target_path):
                 raise FileNotFoundError(f"{self.filepath} not found — run the Argo ingestion")
-            with open(self.filepath, "r", encoding="utf-8") as f:
+            with open(target_path, "r", encoding="utf-8") as f:
                 payload = json.load(f)
             profiles = payload.get("profiles")
             if not isinstance(profiles, list):

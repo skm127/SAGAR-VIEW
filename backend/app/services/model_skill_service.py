@@ -28,7 +28,10 @@ def _model_times(nc_service) -> Optional[pd.DatetimeIndex]:
     tname = nc_service._find_coord("time", "t")
     if not tname:
         return None
-    return pd.DatetimeIndex(nc_service.dataset[tname].values)
+    idx = pd.DatetimeIndex(nc_service.dataset[tname].values)
+    if idx.tz is not None:
+        idx = idx.tz_convert(None)
+    return idx
 
 
 def colocate_profile(nc_service, profile: Dict[str, Any], variable: str = "thetao",
@@ -42,8 +45,8 @@ def colocate_profile(nc_service, profile: Dict[str, Any], variable: str = "theta
     if times is None or len(times) == 0:
         return None
     try:
-        t_obs = pd.Timestamp(profile["timestamp"]).tz_localize(None) if pd.Timestamp(profile["timestamp"]).tzinfo is None \
-            else pd.Timestamp(profile["timestamp"]).tz_convert(None)
+        ts = pd.Timestamp(profile["timestamp"])
+        t_obs = ts.tz_convert(None) if ts.tzinfo is not None else ts
     except Exception:
         return None
     roles = nc_service.get_time_roles()
@@ -92,7 +95,8 @@ def colocate_fleet(argo_service, nc_service, variable: str = "thetao",
         if c is None:
             times = _model_times(nc_service)
             try:
-                t = pd.Timestamp(p["timestamp"]).tz_convert(None)
+                ts = pd.Timestamp(p["timestamp"])
+                t = ts.tz_convert(None) if ts.tzinfo is not None else ts
                 if times is not None and np.min(np.abs((times - t).total_seconds().values)) / 3600 > max_time_offset_hours:
                     excluded_time += 1
                     continue
