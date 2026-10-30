@@ -40,7 +40,7 @@ GRID_STEP = 0.25
 
 
 def _download_snapshot(ds_key: str, when: datetime, bounds: Dict[str, float], out_dir: str,
-                       horiz_stride: int, retries: int = 3) -> Optional[str]:
+                       horiz_stride: int, retries: int = 2) -> Optional[str]:
     vars_q = "&".join(f"var={v}" for v in HYCOM_GROUPS[ds_key])
     url = (
         NCSS_BASE.format(ds=ds_key)
@@ -51,7 +51,7 @@ def _download_snapshot(ds_key: str, when: datetime, bounds: Dict[str, float], ou
     path = os.path.join(out_dir, f"{ds_key}_{when.strftime('%Y%m%d%H')}.nc")
     for attempt in range(1, retries + 1):
         try:
-            with httpx.stream("GET", url, timeout=httpx.Timeout(300.0, connect=30.0), follow_redirects=True) as r:
+            with httpx.stream("GET", url, timeout=httpx.Timeout(45.0, connect=15.0), follow_redirects=True) as r:
                 if r.status_code != 200:
                     raise RuntimeError(f"HTTP {r.status_code}")
                 with open(path, "wb") as f:

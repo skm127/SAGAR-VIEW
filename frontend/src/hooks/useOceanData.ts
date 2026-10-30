@@ -50,24 +50,30 @@ export function useOceanData(): UseOceanDataReturn {
   // Track the latest request to avoid race conditions
   const requestIdRef = useRef(0);
 
-  // Fetch dataset info and dates on mount
+  // Fetch dataset info and dates on mount with auto-retry
   useEffect(() => {
-    getModelInfo()
-      .then((info) => setDatasetInfo(info))
-      .catch((err) => {
-        console.warn('Could not fetch model info:', err.message);
-      });
+    let timer: any;
+    const loadMetadata = () => {
+      getModelInfo()
+        .then((info) => setDatasetInfo(info))
+        .catch((err) => {
+          console.warn('Could not fetch model info (warming up), retrying in 3s:', err.message);
+          timer = setTimeout(loadMetadata, 3000);
+        });
 
-    getTimeInfo()
-      .then((tInfo) => {
-        if (tInfo && tInfo.dates) {
-          setDates(tInfo.dates);
-          setTimeIndex(Math.max(0, tInfo.dates.length - 1));
-        }
-      })
-      .catch((err) => {
-        console.warn('Could not fetch time info:', err.message);
-      });
+      getTimeInfo()
+        .then((tInfo) => {
+          if (tInfo && tInfo.dates) {
+            setDates(tInfo.dates);
+            setTimeIndex(Math.max(0, tInfo.dates.length - 1));
+          }
+        })
+        .catch((err) => {
+          console.warn('Could not fetch time info:', err.message);
+        });
+    };
+    loadMetadata();
+    return () => clearTimeout(timer);
   }, []);
 
   // Derived values from dataset info
@@ -106,6 +112,14 @@ export function useOceanData(): UseOceanDataReturn {
       const msg = err?.response?.data?.detail || err?.message || 'Failed to fetch data';
       setError(msg);
       console.error('Fetch slice error:', msg);
+      // If the backend is warming up / downloading live data, auto-retry in 3 seconds
+      if (msg.includes('503') || msg.includes('not loaded') || msg.toLowerCase().includes('timeout')) {
+        setTimeout(() => {
+          if (currentRequestId === requestIdRef.current) {
+            fetchSlice();
+          }
+        }, 3000);
+      }
     } finally {
       if (currentRequestId === requestIdRef.current) {
         setLoading(false);

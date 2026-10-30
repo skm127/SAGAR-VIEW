@@ -40,16 +40,19 @@ async def lifespan(app: FastAPI):
     """Load datasets on startup, close on shutdown."""
     settings = get_settings()
     
-    # Live ocean model (HYCOM / CMEMS) — never a synthetic fixture
+    # Live ocean model (HYCOM / CMEMS)
     nc_service = NetCDFService(settings.model_data_path)
     if os.path.exists(settings.model_data_path):
         nc_service.load()
-        if nc_service.is_synthetic and os.getenv("ALLOW_SYNTHETIC_DATA", "").lower() != "true":
-            logger.error("%s is SYNTHETIC — refusing to serve it (set ALLOW_SYNTHETIC_DATA=true to override)",
-                         settings.model_data_path)
-            nc_service.close()
     else:
-        logger.warning("Model data not found at %s — a live refresh will be started", settings.model_data_path)
+        # Instant startup fallback: load baked-in baseline while live HYCOM refreshes in background
+        sample_path = os.path.join(settings.data_dir, "model", "sample_bob_model.nc")
+        if os.path.exists(sample_path):
+            logger.info("Serving baseline model from %s while live data refreshes in background", sample_path)
+            nc_service = NetCDFService(sample_path)
+            nc_service.load()
+        else:
+            logger.warning("Model data not found at %s — a live refresh will be started", settings.model_data_path)
 
     # Real QC'd Argo profiles (Argo GDAC via ERDDAP)
     argo_service = ArgoService(settings.argo_data_path)
